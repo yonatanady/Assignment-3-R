@@ -34,3 +34,48 @@ surveys_weight <- surveys %>%
 species_year <- surveys %>%
   filter(!is.na(year), !is.na(weight), !genus == "") %>%
   group_by(year, genus, weight) %>% select(year, genus, weight) %>% tally()
+
+#1st graph - time series plot
+#plot using species
+ggplot(surveys_weight, aes(x = year, y = average_weight)) + 
+  geom_line(aes(color = species_id)) 
+
+#plot using genus
+#i find this plot is cleaner than the one using species_id
+ggplot(surveys_weight, aes(x = year, y = average_weight)) + 
+  geom_line(aes(color = genus))
+
+
+#2nd graph
+#diff between female and male weight
+surveys_weight_sex <- surveys %>%
+  filter(!is.na(year), !is.na(weight), !is.na(sex), !species_id == "") %>%
+  group_by(species_id, sex) %>% 
+  mutate(average_weight = mean(weight))
+
+ggplot(surveys_weight_sex, aes(x = species_id, y = weight)) + 
+  geom_boxplot(aes(color = sex))  
+
+#t-test
+#by Nicole
+
+
+#to find out how to beautify the plots like add plot title, axis label etc
+#by Rio
+ggplot(surveys_weight_sex, aes(x = species_id, y = weight)) + 
+  geom_boxplot(aes(color = sex)) + 
+  theme_bw() + theme(legend.position = "right") +
+  print(ggtitle("Comparasion Between Female \nand Male Weight")) +
+  theme(plot.title = element_text(hjust = 0.5))
+
+ggplot(surveys_weight, aes(x = year, y = average_weight)) + 
+  geom_line(aes(color = genus)) +
+  theme_bw() + theme(legend.position = "right") +
+  print(ggtitle("Average Weight Based on Genus")) +
+  theme(plot.title = element_text(hjust = 0.5))
+
+ggplot(surveys_weight, aes(x = year, y = average_weight)) + 
+  geom_line(aes(color = species_id)) +
+  theme_bw() + theme(legend.position = "right") +
+  print(ggtitle("Average Weight Based on Species")) +
+  theme(plot.title = element_text(hjust = 0.5))
