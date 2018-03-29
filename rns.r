@@ -21,3 +21,16 @@ surveys_weight <- surveys %>%
     filter(!is.na(year), !is.na(weight), !species_id == "") %>%
     group_by(year, species_id) %>% 
     mutate(average_weight = mean(weight)) 
+
+#weight according to genus
+surveys_weight <- surveys %>%
+  filter(!is.na(year), !is.na(weight), !genus == "") %>%
+  group_by(year, genus) %>% 
+  mutate(average_weight = mean(weight)) 
+
+#just to check
+#to see distribution of species according to year
+#to find out only include only those have 1977-2002 data by Swan
+species_year <- surveys %>%
+  filter(!is.na(year), !is.na(weight), !genus == "") %>%
+  group_by(year, genus, weight) %>% select(year, genus, weight) %>% tally()
