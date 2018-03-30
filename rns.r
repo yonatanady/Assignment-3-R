@@ -144,7 +144,11 @@ surveys_weight_sex <- surveys %>%
 ggplot(surveys_weight_sex, aes(x = species_id, y = weight)) + 
   geom_boxplot(aes(color = sex))  
 
-#t-test & annova
+#Same graph as above, but by genus
+ggplot(surveys_weight_sex, aes(x = genus, y = weight)) + 
+  geom_boxplot(aes(color = sex))
+
+#t-test & anova
 #by Nicole
 
 
@@ -171,51 +175,28 @@ ggplot(surveys_weight, aes(x = year, y = average_weight)) +
   theme(plot.title = element_text(hjust = 0.5)) +
   ylab("Mean Weight (g)")
 
-####
-#####################NICOLE Edits required
-
-#Same graph as on line 57, but by genus
-ggplot(surveys_weight_sex, aes(x = genus, y = weight)) + 
-  geom_boxplot(aes(color = sex))
-
-
-##########Graph of hindfoot length vs. species_id for each taxa
-
+#average rodent hindfoot length according to species_id for each taxa
+#note that the only taxon with information about hindfoot length is Rodent (see summary below), so there is only 1 graph
 surveys_hfoot_id <- surveys %>%
   filter(!is.na(hindfoot_length), !taxa == "", !species_id == "") %>% 
   group_by(species_id) %>%
   mutate(average_hfoot = mean(hindfoot_length))
 
-#This code works up until geom_bar. The base plot works, but the bars don't.
+summary(as.factor(surveys_hfoot_id$taxa))
+
 ggplot(surveys_hfoot_id, aes(x = species_id, y = average_hfoot)) + 
   theme_bw() + theme(legend.position = "right") +
   print(ggtitle("Rodent Hindfoot Length")) +
   theme(plot.title = element_text(hjust = 0.5)) +
   labs(x = "Species ID", y = "Hindfoot Length (cm)") +
-  geom_bar(stat = "identity") +
-  geom_text(aes(label=average_hfoot), vjust=-0.3, size=3.5)
+  stat_summary(fun.y = "mean", geom = "bar") +
+  geom_text(aes(label=round(average_hfoot)), vjust=-0.3, size=3.5)
 
-ggplot(data=Rodents, aes(x=species_id, y=average_hfoot)) +
-  geom_bar(stat="identity") +
-  geom_text(aes(label=average_hfoot), vjust=-0.3, size=3.5)
-
-# Rodents <-surveys_hfoot_id %>% filter(taxa=="Rodent") 
-# Birds <-surveys_hfoot_id %>% filter(taxa=="Bird")
-# Rabbits <-surveys_hfoot_id %>% filter(taxa=="Rabbit")
-# Reptiles <-surveys_hfoot_id %>% filter(taxa=="Reptile")
-
-#labs(colour = "NewName") to change legend title
-
-
-####################Graph of average hindfoot length vs. plot type
-#base plot works, but the bars won't 
+#average rodent hindfoot length according to plot type
 surveys_hfoot_plottype <- surveys %>%
-  filter(!is.na(hindfoot_length), !plot_type == "") %>% 
-  group_by(plot_type) %>%
-  mutate(average_hfoot = mean(hindfoot_length))
+  filter(!is.na(hindfoot_length), !plot_type == "") 
 
-ggplot(data=surveys_hfoot_plottype, aes(x=plot_type, y=average_hfoot)) +
-  geom_bar(stat = "count") +
-  geom_text(aes(label=average_hfoot), vjust=-0.3, size=3.5)
-
-#####################^NICOLE Edits required
+ggplot(aes(x = plot_type, y = hindfoot_length), data = surveys_hfoot_plottype) + 
+  stat_summary(fun.y = "mean", geom = "bar") +
+  labs(x = "Plot Type", y = "Hindfoot Length (cm)", title = "Average Rodent Hindfoot Length by Plot Type") +
+  theme(plot.title = element_text(hjust = 0.5))
