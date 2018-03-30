@@ -15,6 +15,95 @@ str(surveys)
 
 summary(surveys)
 
+#========Exploratory Analysis===========================
+#distribution of the species and taxa
+surveys_species <- surveys %>%
+    filter(!is.na(taxa), !is.na(genus), !is.na(species), !species_id == "") %>%
+    mutate(species_name = paste(genus, species)) %>% group_by(taxa, species_name, species_id) %>% 
+    tally()
+
+surveys_taxa <- surveys %>%
+    filter(!is.na(taxa)) %>% group_by(taxa) %>% 
+    tally()
+
+#plot distribution pie chart
+plot_ly(surveys_taxa, labels = ~taxa, values = ~n, type = 'pie',textposition = 'outside',
+        domain = list(x = c(0, 0), y = c(0, 0)), textinfo = 'label+percent',
+        rotation = -108, direction = "clockwise", 
+        textfont = list(color = '#000000', size = 16)) %>%
+    layout(title = 'Taxa Distribution', xaxis = list(showgrid = FALSE, zeroline = FALSE, 
+                                                     showticklabels = FALSE), 
+           yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+
+#further breakdown of each taxa
+#bird distribution
+bird_species <- surveys_species %>% filter(taxa == "Bird") %>% 
+    group_by(taxa, species_id)
+
+#rabbit distribution
+rabbit_species <- surveys_species %>% filter(taxa == "Rabbit") %>% 
+    group_by(taxa, species_id) 
+
+#reptile distribution
+reptile_species <- surveys_species %>% filter(taxa == "Reptile") %>% 
+    group_by(taxa, species_id) 
+
+#rodent distribution
+rodent_species <- surveys_species %>% filter(taxa == "Rodent") %>% 
+    group_by(taxa, species_id) 
+
+#combined multiple pie charts
+#to label each pie chart with bird, rabbit, reptile and rodent
+plot_ly() %>%
+    add_pie(data = bird_species, labels = ~species_name, values = ~n, name = "Bird",
+            domain = list(x = c(0, 0.5), y = c(0.55, 1)), textposition = 'inside',
+            textinfo = 'label+percent') %>%
+    add_pie(data = rabbit_species, labels = ~species_name, values = ~n,
+            domain = list(x = c(0.5, 1), y = c(0.55, 1)), textposition = 'inside',
+            textinfo = 'label+percent') %>%
+    add_pie(data = reptile_species, labels = ~species_name, values = ~n,
+            domain = list(x = c(0, 0.5), y = c(0, 0.45)), textposition = 'inside',
+            textinfo = 'label+percent') %>%
+    add_pie(data = rodent_species, labels = ~species_name, values = ~n,
+            domain = list(x = c(0.5, 1), y = c(0, 0.45)), textposition = 'inside',
+            textinfo = 'label+percent') %>%
+    layout(title = "Distribution of Species according to Taxa", showlegend = F,
+           xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+           yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+
+
+#sex information according to taxa
+surveys_taxa_sex <- surveys %>%
+    filter(!is.na(sex)) %>% select(taxa,sex) %>%
+    group_by(taxa, sex) %>% tally()
+#only rodent that had the sex are, the other taxa sex is n/a
+
+ggplot(surveys_taxa_sex, aes(x = sex, y = n)) + 
+    geom_bar(stat = "identity") +
+    theme_bw() + theme(legend.position = "right") +
+    print(ggtitle("Sex Distribution of Rodent")) +
+    theme(plot.title = element_text(hjust = 0.5)) +
+    ylab("Count")
+
+#taxa information according to years
+surveys_taxa_years <- surveys %>%
+    select(taxa,year) %>%
+    group_by(taxa, year) %>% tally()
+
+surveys_taxa_years$year <- as.factor(surveys_taxa_years$year)
+
+p <- ggplot(surveys_taxa_years, aes(x = year, y = n)) + 
+    geom_bar(stat = "identity")
+
+p+facet_wrap(~taxa, scales = "free_y") +
+    theme_bw() + theme(legend.position = "right") +
+    print(ggtitle("Taxa Information According to Year")) +
+    theme(plot.title = element_text(hjust = 0.5)) + 
+    theme(axis.text.x = element_text(angle = 68, hjust = 1, size = 9)) +
+    ylab("Count")
+
+#========Statistical Analysis===========================
+
 #weight according to species
 #compare with weight according to genus
 surveys_weight <- surveys %>%
@@ -46,8 +135,7 @@ ggplot(surveys_weight, aes(x = year, y = average_weight)) +
   geom_line(aes(color = genus))
 
 
-#2nd graph
-#diff between female and male weight
+#difference between female and male weight
 surveys_weight_sex <- surveys %>%
   filter(!is.na(year), !is.na(weight), !is.na(sex), !species_id == "") %>%
   group_by(species_id, sex) %>% 
@@ -56,7 +144,7 @@ surveys_weight_sex <- surveys %>%
 ggplot(surveys_weight_sex, aes(x = species_id, y = weight)) + 
   geom_boxplot(aes(color = sex))  
 
-#t-test
+#t-test & annova
 #by Nicole
 
 
@@ -84,32 +172,3 @@ ggplot(surveys_weight, aes(x = year, y = average_weight)) +
   ylab("Mean Weight (gram)")
 
 
-#sex information according to taxa
-surveys_taxa_sex <- surveys %>%
-  filter(!is.na(sex)) %>% select(taxa,sex) %>%
-  group_by(taxa, sex) %>% tally()
-#only rodent that had the sex are, the other taxa sex is n/a
-
-ggplot(surveys_taxa_sex, aes(x = sex, y = n)) + 
-  geom_bar(stat = "identity") +
-  theme_bw() + theme(legend.position = "right") +
-  print(ggtitle("Sex Distribution of Rodent")) +
-  theme(plot.title = element_text(hjust = 0.5)) +
-  ylab("Count")
-
-#taxa information according to years
-surveys_taxa_years <- surveys %>%
-  select(taxa,year) %>%
-  group_by(taxa, year) %>% tally()
-
-surveys_taxa_years$year <- as.factor(surveys_taxa_years$year)
-
-p <- ggplot(surveys_taxa_years, aes(x = year, y = n)) + 
-  geom_bar(stat = "identity")
-
-p+facet_wrap(~taxa, scales = "free_y") +
-  theme_bw() + theme(legend.position = "right") +
-  print(ggtitle("Taxa Information According to Year")) +
-  theme(plot.title = element_text(hjust = 0.5)) + 
-  theme(axis.text.x = element_text(angle = 68, hjust = 1, size = 9)) +
-  ylab("Count")
