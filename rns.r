@@ -66,16 +66,33 @@ ggplot(surveys_weight_sex, aes(x = species_id, y = weight)) +
   geom_boxplot(aes(color = sex)) + 
   theme_bw() + theme(legend.position = "right") +
   print(ggtitle("Comparasion Between Female \nand Male Weight")) +
-  theme(plot.title = element_text(hjust = 0.5))
+  theme(plot.title = element_text(hjust = 0.5)) +
+  ylab("Mean Weight (gram)")
 
 ggplot(surveys_weight, aes(x = year, y = average_weight)) + 
   geom_line(aes(color = genus)) +
   theme_bw() + theme(legend.position = "right") +
   print(ggtitle("Average Weight Based on Genus")) +
-  theme(plot.title = element_text(hjust = 0.5))
+  theme(plot.title = element_text(hjust = 0.5)) +
+  ylab("Mean Weight (gram)")
 
 ggplot(surveys_weight, aes(x = year, y = average_weight)) + 
   geom_line(aes(color = species_id)) +
   theme_bw() + theme(legend.position = "right") +
   print(ggtitle("Average Weight Based on Species")) +
-  theme(plot.title = element_text(hjust = 0.5))
+  theme(plot.title = element_text(hjust = 0.5)) +
+  ylab("Mean Weight (gram)")
+
+
+#sex information according to taxa
+surveys_taxa_sex <- surveys %>%
+  filter(!is.na(sex)) %>% select(taxa,sex) %>%
+  group_by(taxa, sex) %>% tally()
+#only rodent that had the sex are, the other taxa sex is n/a
+
+ggplot(surveys_taxa_sex, aes(x = sex, y = n)) + 
+  geom_bar(stat = "identity") +
+  theme_bw() + theme(legend.position = "right") +
+  print(ggtitle("Sex Distribution of Rodent")) +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  ylab("Count")
