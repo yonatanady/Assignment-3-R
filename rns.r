@@ -96,3 +96,20 @@ ggplot(surveys_taxa_sex, aes(x = sex, y = n)) +
   print(ggtitle("Sex Distribution of Rodent")) +
   theme(plot.title = element_text(hjust = 0.5)) +
   ylab("Count")
+
+#taxa information according to years
+surveys_taxa_years <- surveys %>%
+  select(taxa,year) %>%
+  group_by(taxa, year) %>% tally()
+
+surveys_taxa_years$year <- as.factor(surveys_taxa_years$year)
+
+p <- ggplot(surveys_taxa_years, aes(x = year, y = n)) + 
+  geom_bar(stat = "identity")
+
+p+facet_wrap(~taxa, scales = "free_y") +
+  theme_bw() + theme(legend.position = "right") +
+  print(ggtitle("Taxa Information According to Year")) +
+  theme(plot.title = element_text(hjust = 0.5)) + 
+  theme(axis.text.x = element_text(angle = 68, hjust = 1, size = 9)) +
+  ylab("Count")
