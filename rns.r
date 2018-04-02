@@ -112,8 +112,8 @@ surveys_weight <- surveys %>%
 ggplot(surveys_weight, aes(x = year, y = average_weight)) + 
     geom_line(aes(color = species_id)) + theme_classic() + 
     theme(legend.position = "right") +
-    labs(title = "Distribution of Species Average Weight according to Year", x = "Year", 
-         y = "Average Weight", color = "Species ID") +
+    labs(title = "Distribution of Species Average Weight According to Year", x = "Year", 
+         y = "Average Weight (g)", color = "Species ID") +
     theme(plot.title = element_text(hjust = 0.5, size = 14)) + 
     theme(axis.text.x = element_text(size = 9)) +
     theme(axis.text.y = element_text(size = 9)) 
@@ -269,6 +269,6 @@ ggplot(surveys_weight_sex, aes(x = species_id, y = weight)) +
     theme(axis.text.x = element_text(angle = 68, hjust = 1, size = 9)) +
     theme(axis.text.y = element_text(size = 9))  
 
-
-#t-test & anova
-
+#Linear regression for graph line 245
+#t-test for overall mean male vs. overall mean female weights
+#ANOVA/Tukey tests for mean weights of different species
