@@ -2,12 +2,27 @@
 title: "Assignment 3 (R)"
 author: "Yonatan Ady, Nicole Keefner, Swan Tan"
 date: "April 1, 2018"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
 ---
-
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE, fig.width = 12, fig.height = 8, fig.path = 'Figures/')
 ```
+
+```{r library}
+library(tidyverse)
+library(gridExtra)
+library(knitr)
+library(plotly)
+```
+
+```{r data}
+download.file("https://ndownloader.figshare.com/files/2292169", "data/portal_data_joined.csv")
+
+surveys <- read_csv("data/portal_data_joined.csv")
+```
+
 
 ## Working with data and writing a report using R
 
@@ -23,18 +38,14 @@ There are 3 separate chapters that we use to group what is our focus, that is :
 
 ## Chapter 1. Exploratory Analysis
 
-Overall distribution of the species by taxa
-
-```{r}
+```{r Overall distribution of the species by taxa}
 surveys_taxa <- surveys %>%
     filter(!is.na(taxa)) %>% group_by(taxa) %>% 
     tally()
 
 ```
 
-"Species ditribution by taxa" pie chart:
-
-```{r pressure, echo=FALSE}
+```{r species pie chart}
 plot_ly(surveys_taxa, labels = ~taxa, values = ~n, type = 'pie',textposition = 'outside',
         domain = list(x = c(0, 0), y = c(0, 0)), textinfo = 'label+percent',
         rotation = -108, direction = "clockwise", 
@@ -44,47 +55,34 @@ plot_ly(surveys_taxa, labels = ~taxa, values = ~n, type = 'pie',textposition = '
            yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
 ```
 
-To find out what are the species and how many of them for each taxa
-
-```{r}
+```{r To find out what are the species and how many of them for each taxa}
 surveys_species <- surveys %>%
     filter(!is.na(taxa), !is.na(genus), !is.na(species), !species_id == "") %>%
     mutate(species_name = paste(genus, species)) %>% group_by(taxa, species_name, species_id) %>% 
     tally()
 ```
 
-Bird distribution
-
-```{r}
+```{r Bird distribution}
 bird_species <- surveys_species %>% filter(taxa == "Bird") %>% 
     group_by(taxa, species_id)
 ```
 
-Rabbit distribution
-
-```{r}
+```{r Rabbit distribution}
 rabbit_species <- surveys_species %>% filter(taxa == "Rabbit") %>% 
     group_by(taxa, species_id) 
 ```
 
-Reptile distribution
-
-```{r}
+```{r Reptile distribution}
 reptile_species <- surveys_species %>% filter(taxa == "Reptile") %>% 
     group_by(taxa, species_id) 
 ```
 
-Because rodent is the most abundant, we need to show them separately
-Rodent distribution
-
-```{r}
+```{r Rodent distribution}
 rodent_species <- surveys_species %>% filter(taxa == "Rodent") %>% 
     group_by(taxa, species_id) 
 ```
 
-Pie chart for each taxa except rodent
-
-```{r}
+```{r Pie chart for each taxa except rodent}
 b <- plot_ly(bird_species, labels = ~species_name, values = ~n, type = 'pie',
              domain = list(x = c(0, 0.5), y = c(0.55, 1)), textposition = 'inside',
              textinfo = 'label+percent', textfont = list(color = '#000000', size = 12)) %>%
@@ -111,19 +109,15 @@ ro <- plot_ly(rodent_species, labels = ~species_name, values = ~n, type = 'pie',
 
 ```
 
-Combined multiple pie charts
-
-```{r}
+```{r Combined multiple pie charts}
 subplot(b, ra, re, ro, nrows = 2, titleX = TRUE) %>% 
-    layout(title = "Distribution of Species according to Taxa", 
+    layout(title = "Distribution of Species According to Taxa", 
            showlegend = FALSE,
            xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
            yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
 ```
 
-Taxa information according to years
-
-```{r}
+```{r Taxa information according to years}
 surveys_taxa_years <- surveys %>%
     select(taxa,year) %>%
     group_by(taxa, year) %>% tally()
@@ -131,9 +125,7 @@ surveys_taxa_years <- surveys %>%
 surveys_taxa_years$year <- as.factor(surveys_taxa_years$year)
 ```
 
-"Taxa information according to years" chart
-
-```{r}
+```{r taxa by years chart}
 ggplot(surveys_taxa_years, aes(x = year, y = n)) + 
     geom_bar(stat = "identity") + facet_wrap(~taxa, scales = "free_y") +
     theme_linedraw() + theme(legend.position = "right") +
@@ -144,23 +136,19 @@ ggplot(surveys_taxa_years, aes(x = year, y = n)) +
     theme(axis.text.y = element_text(size = 9))
 ```
 
-Weight according to species
-
-```{r}
+```{r Weight according to species}
 surveys_weight <- surveys %>%
     filter(!is.na(year), !is.na(weight), !species_id == "") %>%
     group_by(year, species_id) %>% 
     mutate(average_weight = mean(weight)) 
 ```
 
-Time series plot
-
-```{r}
+```{r Time series chart}
 ggplot(surveys_weight, aes(x = year, y = average_weight)) + 
     geom_line(aes(color = species_id)) + theme_classic() + 
     theme(legend.position = "right") +
-    labs(title = "Distribution of Species Average Weight according to Year", x = "Year", 
-         y = "Average Weight", color = "Species ID") +
+    labs(title = "Distribution of Species Average Weight According to Year", x = "Year", 
+         y = "Average Weight (g)", color = "Species ID") +
     theme(plot.title = element_text(hjust = 0.5, size = 14)) + 
     theme(axis.text.x = element_text(size = 9)) +
     theme(axis.text.y = element_text(size = 9)) 
@@ -169,7 +157,7 @@ ggplot(surveys_weight, aes(x = year, y = average_weight)) +
 Average rodent hindfoot length according to species_id for each taxa 
 (note that the only taxon with information about hindfoot length is Rodent (see summary below), that's why there is only 1 graph)
 
-```{r}
+```{r Average rodent hindfoot length according to species_id for each taxa}
 surveys_hfoot_id <- surveys %>%
     filter(!is.na(hindfoot_length), !taxa == "", !species_id == "") %>% 
     group_by(species_id) %>%
@@ -178,9 +166,7 @@ surveys_hfoot_id <- surveys %>%
 summary(as.factor(surveys_hfoot_id$taxa))
 ```
 
-Average rodent hindfoot lenght graph
-
-```{r}
+```{r Average rodent hindfoot length graph}
 ggplot(surveys_hfoot_id, aes(x = species_id, y = average_hfoot)) +
     theme_classic() + theme(legend.position = "right") +
     labs(title = "Rodent Hindfoot Length", x = "Species ID", 
@@ -192,16 +178,12 @@ ggplot(surveys_hfoot_id, aes(x = species_id, y = average_hfoot)) +
     theme(axis.text.y = element_text(size = 9))
 ```
 
-Average rodent hindfoot length according to plot type
-
-```{r}
+```{r Average rodent hindfoot length according to plot type}
 surveys_hfoot_plottype <- surveys %>%
     filter(!is.na(hindfoot_length), !plot_type == "") 
 ```
 
-"Average rodent hindfoot length according to plot type" graph
-
-```{r}
+```{r Average rodent hindfoot length according to plot type graph}
 ggplot(aes(x = plot_type, y = hindfoot_length), data = surveys_hfoot_plottype) + 
     stat_summary(fun.y = "mean", geom = "bar") + theme_classic() + 
     theme(legend.position = "right") +
@@ -214,9 +196,7 @@ ggplot(aes(x = plot_type, y = hindfoot_length), data = surveys_hfoot_plottype) +
 
 ## Chapter 2. Analysis based on Rodent
 
-Distribution of rodent
-
-```{r}
+```{r Distribution of rodent}
 plot_ly(rodent_species, labels = ~species_name, values = ~n, type = 'pie',
               domain = list(x = c(0, 0), y = c(0, 0)), textposition = 'inside',
               textinfo = 'label+percent') %>%
@@ -225,24 +205,18 @@ plot_ly(rodent_species, labels = ~species_name, values = ~n, type = 'pie',
            yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
 ```
 
-To correlate hindfoot_length and weight of rodent
-
-```{r}
+```{r To correlate hindfoot_length and weight of rodent}
 rodent_complete <- surveys %>% 
     filter(!is.na(sex), !is.na(hindfoot_length), !is.na(weight), !is.na(plot_type))
 rodent_complete$year <- as.factor(rodent_complete$year)
 ```
 
-Year capture according to rodent species_id
-
-```{r}
+```{r Year capture according to rodent species_id}
 rodent_genus_year <- rodent_complete %>% select(genus, species_id, year) %>% 
     group_by(genus, species_id, year) %>% tally()
 ```
 
-"Year capture according to rodent species_id" graph
-
-```{r}
+```{r Year capture according to rodent species_id graph}
 spp_year_count <- ggplot(rodent_genus_year, aes(x = year, y = n, fill = species_id)) + 
     geom_bar(stat = "identity") + theme_classic() + theme(legend.position = "right") +
     labs(title = "Species Captured according to Year", x = "Year", 
@@ -255,15 +229,13 @@ spp_year_count <- ggplot(rodent_genus_year, aes(x = year, y = n, fill = species_
 Sex information according to taxa
 (note : only rodent that had the sex are, the other taxa sex is n/a)
 
-```{r}
+```{r Sex information according to taxa}
 surveys_taxa_sex <- surveys %>%
     filter(!is.na(sex)) %>% select(taxa,sex) %>%
     group_by(taxa, sex) %>% tally()
 ```
 
-"Sex information according to taxa" graph
-
-```{r}
+```{r Sex information according to taxa graph}
 ggplot(surveys_taxa_sex, aes(x = sex, y = n)) + 
     geom_bar(stat = "identity") +
     theme_classic() + theme(legend.position = "right") +
@@ -274,16 +246,12 @@ ggplot(surveys_taxa_sex, aes(x = sex, y = n)) +
     theme(axis.text.y = element_text(size = 9))
 ```
 
-Female and male distribution according to species_id
-
-```{r}
+```{r Female and male distribution according to species_id}
 rodent_species_sex <- rodent_complete %>% select(species_id, sex) %>%
     group_by(species_id, sex) %>% tally()
 ```
 
-"Female and male distribution according to species_id" graph
-
-```{r}
+```{r Female and male distribution according to species_id graph}
 spp_sex_count <- ggplot(rodent_species_sex, aes(x = species_id, y = log(n), fill = sex)) + 
     geom_bar(stat = "identity") + theme_classic() + theme(legend.position = "right") +
     labs(title = "Sex Distribution of Species", x = "Species ID", 
@@ -294,15 +262,11 @@ spp_sex_count <- ggplot(rodent_species_sex, aes(x = species_id, y = log(n), fill
 
 ```
 
-Combine both plot
-
-```{r}
+```{r Combine both plot}
 grid.arrange(spp_year_count, spp_sex_count, ncol = 2, widths = c(5,5))
 ```
 
-Density of weight according to sex for each plot type
-
-```{r}
+```{r Density of weight according to sex for each plot type}
 ggplot(rodent_complete, aes(x = weight, fill = sex)) +
     geom_density(alpha = 0.6) + facet_wrap(~ plot_type) + theme_linedraw() + 
     theme(legend.position = "right") +
@@ -313,9 +277,7 @@ ggplot(rodent_complete, aes(x = weight, fill = sex)) +
     theme(axis.text.y = element_text(size = 9))
 ```
 
-Density of hindfoot_length according to sex for each plot type
-
-```{r}
+```{r Density of hindfoot_length according to sex for each plot type}
 ggplot(rodent_complete, aes(x = hindfoot_length, fill = sex)) +
     geom_density(alpha = 0.6) + facet_wrap(~ plot_type) +
     theme_linedraw() + theme(legend.position = "right") +
@@ -327,16 +289,12 @@ ggplot(rodent_complete, aes(x = hindfoot_length, fill = sex)) +
 
 ```
 
-Density of species per year for each plot type
-
-```{r}
+```{r Density of species per year for each plot type}
 rodent_complete <- surveys %>% 
     filter(!is.na(sex), !is.na(hindfoot_length), !is.na(weight), !is.na(plot_type))
 ```
 
-"Density of species per year for each plot type" graph
-
-```{r}
+```{r Density of species per year for each plot type graph}
 ggplot(rodent_complete, aes(x = year, fill = species_id)) +
     geom_density(alpha = 0.6) + facet_wrap(~ plot_type) +
     theme_linedraw() + theme(legend.position = "right") +
@@ -347,9 +305,7 @@ ggplot(rodent_complete, aes(x = year, fill = species_id)) +
     theme(axis.text.y = element_text(size = 9))
 ```
 
-To correlate hind_foot length and weight according to species_id
-
-```{r}
+```{r To correlate hind_foot length and weight according to species_id}
 ggplot(rodent_complete, aes(x = weight, y = hindfoot_length)) + 
     geom_point(aes(color = species_id)) +
     geom_smooth(method = "lm", se = FALSE, color = 'maroon') +
@@ -363,18 +319,14 @@ ggplot(rodent_complete, aes(x = weight, y = hindfoot_length)) +
 
 ## Chapter 3. Statistical Analysis
 
-Difference between female and male weight
-
-```{r}
+```{r Difference between female and male weight}
 surveys_weight_sex <- surveys %>%
   filter(!is.na(year), !is.na(weight), !is.na(sex), !species_id == "") %>%
   group_by(species_id, sex) %>% 
   mutate(average_weight = mean(weight))
 ```
 
-"Difference between female and male weight" graph
-
-```{r}
+```{r Difference between female and male weight graph}
 ggplot(surveys_weight_sex, aes(x = species_id, y = weight)) + 
   geom_boxplot(aes(color = sex)) + theme_classic() + theme(legend.position = "right") +
     labs(title = "Comparison Between Female \nand Male Weight", x = "Species ID", 
