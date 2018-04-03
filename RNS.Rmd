@@ -26,8 +26,8 @@ surveys <- read_csv("data/portal_data_joined.csv")
 
 ## Working with data and writing a report using R
 
-This report will summarize what we have done in this group's assignment.
-There are 3 separate chapters that we use to group what is our focus, that is :
+This report will summarize what we have done for this group assignment.
+There are 3 separate chapters that we use to group our work :
 
 1. Exploratory Analysis.
 
@@ -154,8 +154,9 @@ ggplot(surveys_weight, aes(x = year, y = average_weight)) +
     theme(axis.text.y = element_text(size = 9)) 
 ```
 
-Average rodent hindfoot length according to species_id for each taxa 
-(note that the only taxon with information about hindfoot length is Rodent (see summary below), that's why there is only 1 graph)
+## Chapter 2. Analysis based on Rodent Data
+
+Based on preliminary investigations, we determined that Rodent was the only taxon for which hindfoot length or sex were recorded. Because of this, any graphs including information about hindfoot length or sex will be strictly for rodent species in the study. The number of rodents in the study is below.
 
 ```{r Average rodent hindfoot length according to species_id for each taxa}
 surveys_hfoot_id <- surveys %>%
@@ -169,7 +170,7 @@ summary(as.factor(surveys_hfoot_id$taxa))
 ```{r Average rodent hindfoot length graph}
 ggplot(surveys_hfoot_id, aes(x = species_id, y = average_hfoot)) +
     theme_classic() + theme(legend.position = "right") +
-    labs(title = "Rodent Hindfoot Length", x = "Species ID", 
+    labs(title = "Average Rodent Hindfoot Length by Species ID", x = "Species ID", 
          y = "Hindfoot Length (cm)") + 
     stat_summary(fun.y = "mean", geom = "bar") +
     geom_text(aes(label=round(average_hfoot)), vjust=-0.3, size=3.5) +
@@ -194,13 +195,11 @@ ggplot(aes(x = plot_type, y = hindfoot_length), data = surveys_hfoot_plottype) +
     theme(axis.text.y = element_text(size = 9))
 ```
 
-## Chapter 2. Analysis based on Rodent
-
 ```{r Distribution of rodent}
 plot_ly(rodent_species, labels = ~species_name, values = ~n, type = 'pie',
               domain = list(x = c(0, 0), y = c(0, 0)), textposition = 'inside',
               textinfo = 'label+percent') %>%
-    layout(title = "Distribution of Rodent", 
+    layout(title = "Distribution of Rodents", 
            xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
            yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
 ```
@@ -219,15 +218,12 @@ rodent_genus_year <- rodent_complete %>% select(genus, species_id, year) %>%
 ```{r Year capture according to rodent species_id graph}
 spp_year_count <- ggplot(rodent_genus_year, aes(x = year, y = n, fill = species_id)) + 
     geom_bar(stat = "identity") + theme_classic() + theme(legend.position = "right") +
-    labs(title = "Species Captured according to Year", x = "Year", 
+    labs(title = "Species Captured According to Year", x = "Year", 
          y = "Count (n)", fill = "Species ID") +
     theme(plot.title = element_text(hjust = 0.5, size = 14)) + 
     theme(axis.text.x = element_text(angle = 68, hjust = 1, size = 9)) +
     theme(axis.text.y = element_text(size = 9))
 ```
-
-Sex information according to taxa
-(note : only rodent that had the sex are, the other taxa sex is n/a)
 
 ```{r Sex information according to taxa}
 surveys_taxa_sex <- surveys %>%
@@ -239,7 +235,7 @@ surveys_taxa_sex <- surveys %>%
 ggplot(surveys_taxa_sex, aes(x = sex, y = n)) + 
     geom_bar(stat = "identity") +
     theme_classic() + theme(legend.position = "right") +
-    labs(title = "Sex Distribution of Rodent", x = "Sex", y = "Count (n)") +
+    labs(title = "Sex Distribution of Rodents", x = "Sex", y = "Count (n)") +
     theme(plot.title = element_text(hjust = 0.5, size = 14)) + 
     theme(axis.text.x = element_text(size = 9)) +
     scale_x_discrete(labels = c("Female", "Male")) +
@@ -270,7 +266,7 @@ grid.arrange(spp_year_count, spp_sex_count, ncol = 2, widths = c(5,5))
 ggplot(rodent_complete, aes(x = weight, fill = sex)) +
     geom_density(alpha = 0.6) + facet_wrap(~ plot_type) + theme_linedraw() + 
     theme(legend.position = "right") +
-    labs(title = "Weight Density according to Sex for Each Plot Type", x = "Weight", 
+    labs(title = "Weight Density According to Sex for Each Plot Type", x = "Weight (g)", 
          y = "Density", fill = "Sex") +
     theme(plot.title = element_text(hjust = 0.5, size = 14)) + 
     theme(axis.text.x = element_text(size = 9)) +
@@ -281,7 +277,7 @@ ggplot(rodent_complete, aes(x = weight, fill = sex)) +
 ggplot(rodent_complete, aes(x = hindfoot_length, fill = sex)) +
     geom_density(alpha = 0.6) + facet_wrap(~ plot_type) +
     theme_linedraw() + theme(legend.position = "right") +
-    labs(title = "Hindfoot Length Density according to Sex for Each Plot Type", 
+    labs(title = "Hindfoot Length Density According to Sex for Each Plot Type", 
          x = "Hindfoot Length (cm)", y = "Density", fill = "Sex") +
     theme(plot.title = element_text(hjust = 0.5, size = 14)) + 
     theme(axis.text.x = element_text(size = 9)) +
@@ -317,8 +313,6 @@ ggplot(rodent_complete, aes(x = weight, y = hindfoot_length)) +
     theme(axis.text.y = element_text(size = 9))
 ```
 
-## Chapter 3. Statistical Analysis
-
 ```{r Difference between female and male weight}
 surveys_weight_sex <- surveys %>%
   filter(!is.na(year), !is.na(weight), !is.na(sex), !species_id == "") %>%
@@ -329,10 +323,43 @@ surveys_weight_sex <- surveys %>%
 ```{r Difference between female and male weight graph}
 ggplot(surveys_weight_sex, aes(x = species_id, y = weight)) + 
   geom_boxplot(aes(color = sex)) + theme_classic() + theme(legend.position = "right") +
-    labs(title = "Comparison Between Female \nand Male Weight", x = "Species ID", 
+    labs(title = "Weight for Male and Female Rodents by Species ID", x = "Species ID", 
          y = "Average Weight (g)", color = "Sex") +
     theme(plot.title = element_text(hjust = 0.5, size = 14)) + 
     theme(axis.text.x = element_text(angle = 68, hjust = 1, size = 9)) +
     theme(axis.text.y = element_text(size = 9))
 ```
+
+## Chapter 3. Statistical Analysis
+
+The above figure of "Weight for Male and Female Rodents by Species ID" suggests there is a relationship between sex and weight (g) in rodents. We conducted a Student's t-test to compare the weights of males to that of females.
+```{r Students t-test}
+Rodent_Female <- filter(surveys_weight_sex, sex=='F')
+Rodent_Male <- filter(surveys_weight_sex, sex=='M')
+t.test(Rodent_Female$weight, Rodent_Male$weight)
+```
+Because the p-value is less than the alpha of 0.05, we reject the null hypothesis that the mean weights of the two sexes are the same. In the output above, "mean of x" is the mean of females and "mean of y" is the mean of males.
+
+The above figure of "Relationship between Hindfoot Length and Weight of Species" suggests there is a relationship between hindfoot length (cm) and weight (g) in rodents. We created a linear model to determine if there is indeed a relationship between these variables.
+```{r Linear regression}
+fit1 <- lm(hindfoot_length ~ weight, data = rodent_complete)
+summary(fit1)
+```
+Because the p-value is less than the alpha of 0.05, we reject the null hypothesis that the slope of the linear regression model does not differ significantly from zero. In addition, the multiple R-squared value is used to describe how well a given model explains variation in the data. In this case, this model explains 46.73% of the variation in the data.
+
+The above figure of "Average Rodent Hindfoot Length by Species ID" suggests hindfoot length (cm) is different according to species ID. We conducted several tests to determine if this was the case. We began by conducting a Bartlett Test of Homogeneity of Variances to evaluate the homogeneity of variance assumption of ANOVA.
+```{r Bartlett Test}
+bartlett.test(hindfoot_length~species_id, data=surveys_hfoot_id)
+```
+Because the p-value is less than the alpha of 0.05, we reject the null hypothesis that variances of the levels of species ID are equal. Because of this, we know our data does not meet the assumptions of the ANOVA and a non-parametric alternative must be used. In this case, we used a Kruskal-Wallis rank sum test.
+
+```{r Kruskal-Wallis rank sum test}
+kruskal.test(hindfoot_length~as.factor(species_id), data=surveys_hfoot_id)
+```
+Because the p-value is less than the alpha of 0.05, we reject the null hypothesis that all species have the same average hindfoot lengths. However, this test did not inform us as to which species are different from which others. In order to determine this, we conducted a non-parametric Pairwise Wilcoxon rank sum test. In the output below, pairs with values <0.05 are significantly different from each other and we reject the null that the group means are the same.
+```{r Pairwise Wilcoxon Rank Sum Tests}
+pairwise.wilcox.test(surveys_hfoot_id$hindfoot_length, as.factor(surveys_hfoot_id$species_id))
+```
+
+
 
