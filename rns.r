@@ -132,6 +132,12 @@ plot_ly(rodent_species, labels = ~species_name, values = ~n, type = 'pie',
            xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
            yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
 
+#sex information according to taxa
+surveys_taxa_sex <- surveys %>%
+    filter(!is.na(sex)) %>% select(taxa,sex) %>%
+    group_by(taxa, sex) %>% tally()
+#only rodent that had the sex are, the other taxa sex is n/a
+
 ggplot(surveys_taxa_sex, aes(x = sex, y = n)) + 
     geom_bar(stat = "identity") +
     theme_classic() + theme(legend.position = "right") +
@@ -141,7 +147,6 @@ ggplot(surveys_taxa_sex, aes(x = sex, y = n)) +
     theme(axis.text.x = element_text(size = 9)) +
     scale_x_discrete(labels = c("Female", "Male")) +
     theme(axis.text.y = element_text(size = 9))
-
 
 surveys_hfoot_id <- surveys %>%
   filter(!is.na(hindfoot_length), !taxa == "", !species_id == "") %>% 
@@ -196,12 +201,6 @@ spp_year_count <- ggplot(rodent_genus_year, aes(x = year, y = n, fill = species_
     theme(plot.title = element_text(hjust = 0.5, size = 14)) + 
     theme(axis.text.x = element_text(angle = 68, hjust = 1, size = 9)) +
     theme(axis.text.y = element_text(size = 9))
-
-#sex information according to taxa
-surveys_taxa_sex <- surveys %>%
-    filter(!is.na(sex)) %>% select(taxa,sex) %>%
-    group_by(taxa, sex) %>% tally()
-#only rodent that had the sex are, the other taxa sex is n/a
 
 
 #female and male distribution according to species_id

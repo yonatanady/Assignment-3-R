@@ -172,6 +172,12 @@ plot_ly(rodent_species, labels = ~species_name, values = ~n, type = 'pie',
 ```
 Figure 2.1 | The pie chart showed the distribution of 29 rodent species. Dipodomys merriami is the most abundant species, contributing 30.90% of the total. The second abundant species is Chaetodipus penicillatus, 9.12%, followed by Dipodomys ordii, 8.84%. The three least abundant species are Chaetodipus sp., Reithrodontomys sp. and Spermophilus tereticaudus.
 
+```{r Sex information according to taxa}
+surveys_taxa_sex <- surveys %>%
+    filter(!is.na(sex)) %>% select(taxa,sex) %>%
+    group_by(taxa, sex) %>% tally()
+```
+
 ```{r Sex information according to taxa graph}
 ggplot(surveys_taxa_sex, aes(x = sex, y = n)) + 
     geom_bar(stat = "identity") +
@@ -250,12 +256,6 @@ spp_year_count <- ggplot(rodent_genus_year, aes(x = year, y = n, fill = species_
     theme(plot.title = element_text(hjust = 0.5, size = 14)) + 
     theme(axis.text.x = element_text(angle = 68, hjust = 1, size = 9)) +
     theme(axis.text.y = element_text(size = 9))
-```
-
-```{r Sex information according to taxa}
-surveys_taxa_sex <- surveys %>%
-    filter(!is.na(sex)) %>% select(taxa,sex) %>%
-    group_by(taxa, sex) %>% tally()
 ```
 
 ```{r Female and male distribution according to species_id}
