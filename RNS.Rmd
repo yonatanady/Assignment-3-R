@@ -354,31 +354,34 @@ Figure 2.10 | Rodent weight distribution for female and male according to specie
 
 ## Chapter 3. Statistical Analysis
 
-The above figure of "Weight for Male and Female Rodents by Species ID" suggests there is a relationship between sex and weight (g) in rodents. We conducted a Student's t-test to compare the weights of males to that of females.
+Figure 2.10 suggests there is a relationship between sex and weight (g) in rodents. We conducted a Student's t-test to compare the weights of males to that of females.
 ```{r Students t-test}
 Rodent_Female <- filter(surveys_weight_sex, sex=='F')
 Rodent_Male <- filter(surveys_weight_sex, sex=='M')
-t.test(Rodent_Female$weight, Rodent_Male$weight)
+t_test <- t.test(Rodent_Female$weight, Rodent_Male$weight)
+t_test
 ```
-Because the p-value is less than the alpha of 0.05, we reject the null hypothesis that the mean weights of the two sexes are the same. In the output above, "mean of x" is the mean of females and "mean of y" is the mean of males.
+Because the p-value (`r t_test$p.value`) is less than the alpha of 0.05, we reject the null hypothesis that the mean weights of the two sexes are the same. In the output above, "mean of x" is the mean of females and "mean of y" is the mean of males.
 
-The above figure of "Relationship between Hindfoot Length and Weight of Species" suggests there is a relationship between hindfoot length (cm) and weight (g) in rodents. We created a linear model to determine if there is indeed a relationship between these variables.
+Figure 2.9 suggests there is a relationship between hindfoot length (cm) and weight (g) in rodents. We created a linear model to determine if there is indeed a relationship between these variables.
 ```{r Linear regression}
 fit1 <- lm(hindfoot_length ~ weight, data = rodent_complete)
 summary(fit1)
 ```
 Because the p-value is less than the alpha of 0.05, we reject the null hypothesis that the slope of the linear regression model does not differ significantly from zero. In addition, the multiple R-squared value is used to describe how well a given model explains variation in the data. In this case, this model explains 46.73% of the variation in the data.
 
-The above figure of "Average Rodent Hindfoot Length by Species ID" suggests hindfoot length (cm) is different according to species ID. We conducted several tests to determine if this was the case. We began by conducting a Bartlett Test of Homogeneity of Variances to evaluate the homogeneity of variance assumption of ANOVA.
+Figure 2.3 suggests hindfoot length (cm) is different according to species ID. We conducted several tests to determine if this was the case. We began by conducting a Bartlett Test of Homogeneity of Variances to evaluate the homogeneity of variance assumption of ANOVA.
 ```{r Bartlett Test}
-bartlett.test(hindfoot_length~species_id, data=surveys_hfoot_id)
+bartlett <- bartlett.test(hindfoot_length~species_id, data=surveys_hfoot_id)
+bartlett
 ```
-Because the p-value is less than the alpha of 0.05, we reject the null hypothesis that variances of the levels of species ID are equal. Because of this, we know our data does not meet the assumptions of the ANOVA and a non-parametric alternative must be used. In this case, we used a Kruskal-Wallis rank sum test.
+Because the p-value (`r bartlett$p.value`) is less than the alpha of 0.05, we reject the null hypothesis that variances of the levels of species ID are equal. Because of this, we know our data does not meet the assumptions of the ANOVA and a non-parametric alternative must be used. In this case, we used a Kruskal-Wallis rank sum test.
 
 ```{r Kruskal-Wallis rank sum test}
-kruskal.test(hindfoot_length~as.factor(species_id), data=surveys_hfoot_id)
+kruskal <- kruskal.test(hindfoot_length~as.factor(species_id), data=surveys_hfoot_id)
+kruskal
 ```
-Because the p-value is less than the alpha of 0.05, we reject the null hypothesis that all species have the same average hindfoot lengths. However, this test did not inform us as to which species are different from which others. In order to determine this, we conducted a non-parametric Pairwise Wilcoxon rank sum test. In the output below, pairs with values <0.05 are significantly different from each other and we reject the null that the group means are the same.
+Because the p-value (`r kruskal$p.value`) is less than the alpha of 0.05, we reject the null hypothesis that all species have the same average hindfoot lengths. However, this test did not inform us as to which species are different from which others. In order to determine this, we conducted a non-parametric Pairwise Wilcoxon rank sum test. In the output below, pairs with values <0.05 are significantly different from each other and we reject the null that the group means are the same.
 ```{r Pairwise Wilcoxon Rank Sum Tests}
 pairwise.wilcox.test(surveys_hfoot_id$hindfoot_length, as.factor(surveys_hfoot_id$species_id))
 ```
