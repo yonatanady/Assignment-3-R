@@ -54,6 +54,7 @@ plot_ly(surveys_taxa, labels = ~taxa, values = ~n, type = 'pie',textposition = '
                                                      showticklabels = FALSE), 
            yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
 ```
+Figure 1.1 | Taxa distribution of the survey data. Rodent is the major taxon, which contributed 98.50% of the overall taxa distribution. Bird, rabbit and reptile are the minority, which contributed approximately 1.29%, 0.22% and 0.04% respectively. 
 
 ```{r To find out what are the species and how many of them for each taxa}
 surveys_species <- surveys %>%
@@ -82,7 +83,7 @@ rodent_species <- surveys_species %>% filter(taxa == "Rodent") %>%
     group_by(taxa, species_id) 
 ```
 
-```{r Pie chart for each taxa except rodent}
+```{r Pie chart for each taxa}
 b <- plot_ly(bird_species, labels = ~species_name, values = ~n, type = 'pie',
              domain = list(x = c(0, 0.5), y = c(0.55, 1)), textposition = 'inside',
              textinfo = 'label+percent', textfont = list(color = '#000000', size = 12)) %>%
@@ -116,6 +117,7 @@ subplot(b, ra, re, ro, nrows = 2, titleX = TRUE) %>%
            xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
            yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
 ```
+Figure 1.2 | Species distribution of individual taxon. Bird has a total of 11 species, with Amphispiza bilineata being the majority (67.3%), while rabbit only has one, Sylvilagus audubonii. Reptile has seven species in total, with Sceloporus undulatus (35.7%) and Lizard sp. (28.6%) being the two major species. Rodent has the most abundant species distribution, a total of 29 species, with Dipodomys merriami contributed 30.9% of them. 
 
 ```{r Taxa information according to years}
 surveys_taxa_years <- surveys %>%
@@ -135,6 +137,7 @@ ggplot(surveys_taxa_years, aes(x = year, y = n)) +
     theme(axis.text.x = element_text(angle = 68, hjust = 1, size = 9)) +
     theme(axis.text.y = element_text(size = 9))
 ```
+Figure 1.3 | Taxa observations spanning 26 years (1977 to 2002). Rodent showed consistent observations every year, 1977 being the peak of observation. Bird and rabbit have the similar pattern but missing information for a couple of years. Reptile was only observed for eight intermittent years.
 
 ```{r Weight according to species}
 surveys_weight <- surveys %>%
@@ -153,10 +156,34 @@ ggplot(surveys_weight, aes(x = year, y = average_weight)) +
     theme(axis.text.x = element_text(size = 9)) +
     theme(axis.text.y = element_text(size = 9)) 
 ```
+Figure 1.4 | Species average weight distribution from the year 1977 to 2002. Only rodent has the complete information on average weight, hence the species IDs herein refer to the species from rodent taxon. Most species have low average weight, i.e. below 50g and not every species has consistent distribution from the year 1977 to 2002. NL has the maximum of average weight among others and shows consistent distribution throughout the years. 
 
 ## Chapter 2. Analysis based on Rodent Data
 
 Based on preliminary investigations, we determined that Rodent was the only taxon for which hindfoot length or sex were recorded. Because of this, any graphs including information about hindfoot length or sex will be strictly for rodent species in the study. The number of rodents in the study is below.
+
+```{r Distribution of rodent}
+plot_ly(rodent_species, labels = ~species_name, values = ~n, type = 'pie',
+              domain = list(x = c(0, 0), y = c(0, 0)), textposition = 'inside',
+              textinfo = 'label+percent') %>%
+    layout(title = "Distribution of Rodents", 
+           xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+           yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+```
+Figure 2.1 | The pie chart showed the distribution of 29 rodent species. Dipodomys merriami is the most abundant species, contributing 30.90% of the total. The second abundant species is Chaetodipus penicillatus, 9.12%, followed by Dipodomys ordii, 8.84%. The three least abundant species are Chaetodipus sp., Reithrodontomys sp. and Spermophilus tereticaudus.
+
+```{r Sex information according to taxa graph}
+ggplot(surveys_taxa_sex, aes(x = sex, y = n)) + 
+    geom_bar(stat = "identity") +
+    theme_classic() + theme(legend.position = "right") +
+    labs(title = "Gender Distribution of Rodents", x = "Gender", y = "Count (n)") +
+    geom_text(aes(label=round(n)), vjust=-0.3, size=3.5) +
+    theme(plot.title = element_text(hjust = 0.5, size = 14)) + 
+    theme(axis.text.x = element_text(size = 9)) +
+    scale_x_discrete(labels = c("Female", "Male")) +
+    theme(axis.text.y = element_text(size = 9))
+```
+Figure 2.2 | The bar plot showed gender distribution of rodents. There are 17,348 of male and 15,690 of female. Male has a higher count of 1,658 than female. 
 
 ```{r Average rodent hindfoot length according to species_id for each taxa}
 surveys_hfoot_id <- surveys %>%
@@ -178,6 +205,7 @@ ggplot(surveys_hfoot_id, aes(x = species_id, y = average_hfoot)) +
     theme(axis.text.x = element_text(angle = 68, hjust = 1, size = 9)) +
     theme(axis.text.y = element_text(size = 9))
 ```
+Figure 2.3 | The bar plot showed average hindfoot length by rodent species ID. DS has the longest average hindfoot length, i.e. 50cm, whereas BA has the shortest, i.e. 13cm. Most of the species are within the range of 18-22cm. 
 
 ```{r Average rodent hindfoot length according to plot type}
 surveys_hfoot_plottype <- surveys %>%
@@ -194,17 +222,10 @@ ggplot(aes(x = plot_type, y = hindfoot_length), data = surveys_hfoot_plottype) +
     theme(axis.text.x = element_text(angle = 68, hjust = 1, size = 9)) +
     theme(axis.text.y = element_text(size = 9))
 ```
+Figure 2.4 | The bar plot showed average hindfoot length by plot type. Control and Spectab exclosure contain similar average rodent hindfoot length information. 
 
-```{r Distribution of rodent}
-plot_ly(rodent_species, labels = ~species_name, values = ~n, type = 'pie',
-              domain = list(x = c(0, 0), y = c(0, 0)), textposition = 'inside',
-              textinfo = 'label+percent') %>%
-    layout(title = "Distribution of Rodents", 
-           xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-           yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
-```
 
-```{r To correlate hindfoot_length and weight of rodent}
+```{r To extract complete data of rodent}
 rodent_complete <- surveys %>% 
     filter(!is.na(sex), !is.na(hindfoot_length), !is.na(weight), !is.na(plot_type))
 rodent_complete$year <- as.factor(rodent_complete$year)
@@ -217,7 +238,13 @@ rodent_genus_year <- rodent_complete %>% select(genus, species_id, year) %>%
 
 ```{r Year capture according to rodent species_id graph}
 spp_year_count <- ggplot(rodent_genus_year, aes(x = year, y = n, fill = species_id)) + 
-    geom_bar(stat = "identity") + theme_classic() + theme(legend.position = "right") +
+    geom_bar(stat = "identity") +
+    scale_fill_manual(values = c("red", "orange", "yellow", "green", "blue", "pink", 
+                                 "violet", "hotpink", "purple", "plum", "seagreen", "lightblue",
+                                 "cyan", "brown", "blueviolet", "slateblue", "slategrey",
+                                 "magenta", "darksalmon", "deeppink", "lawngreen", "mediumblue",
+                                 "maroon", "royalblue")) +
+    theme_classic() + theme(legend.position = "right") +
     labs(title = "Species Captured According to Year", x = "Year", 
          y = "Count (n)", fill = "Species ID") +
     theme(plot.title = element_text(hjust = 0.5, size = 14)) + 
@@ -231,17 +258,6 @@ surveys_taxa_sex <- surveys %>%
     group_by(taxa, sex) %>% tally()
 ```
 
-```{r Sex information according to taxa graph}
-ggplot(surveys_taxa_sex, aes(x = sex, y = n)) + 
-    geom_bar(stat = "identity") +
-    theme_classic() + theme(legend.position = "right") +
-    labs(title = "Sex Distribution of Rodents", x = "Sex", y = "Count (n)") +
-    theme(plot.title = element_text(hjust = 0.5, size = 14)) + 
-    theme(axis.text.x = element_text(size = 9)) +
-    scale_x_discrete(labels = c("Female", "Male")) +
-    theme(axis.text.y = element_text(size = 9))
-```
-
 ```{r Female and male distribution according to species_id}
 rodent_species_sex <- rodent_complete %>% select(species_id, sex) %>%
     group_by(species_id, sex) %>% tally()
@@ -250,8 +266,8 @@ rodent_species_sex <- rodent_complete %>% select(species_id, sex) %>%
 ```{r Female and male distribution according to species_id graph}
 spp_sex_count <- ggplot(rodent_species_sex, aes(x = species_id, y = log(n), fill = sex)) + 
     geom_bar(stat = "identity") + theme_classic() + theme(legend.position = "right") +
-    labs(title = "Sex Distribution of Species", x = "Species ID", 
-         y = "Count \n log(n)", fill = "Sex") +
+    labs(title = "Gender Distribution of Species", x = "Species ID", 
+         y = "Count \n log(n)", fill = "Gender") +
     theme(plot.title = element_text(hjust = 0.5, size = 14)) + 
     theme(axis.text.x = element_text(angle = 68, hjust = 1, size = 9)) +
     theme(axis.text.y = element_text(size = 9))
@@ -261,29 +277,32 @@ spp_sex_count <- ggplot(rodent_species_sex, aes(x = species_id, y = log(n), fill
 ```{r Combine both plot}
 grid.arrange(spp_year_count, spp_sex_count, ncol = 2, widths = c(5,5))
 ```
+Figure 2.5 | The stacked bar plot on the left panel showed the total of rodent species captured per year. DM has the highest count from the year 1977 to 1999. The amount of PM overtook starting the year 2000 to 2002. The right panel showed gender distribution in terms of species IDs. Overall, most species have a even female and male distribution except OX, PI and RX only have male. PX has one female and male, however, the number is insignificant to be shown on the plot.
 
 ```{r Density of weight according to sex for each plot type}
 ggplot(rodent_complete, aes(x = weight, fill = sex)) +
     geom_density(alpha = 0.6) + facet_wrap(~ plot_type) + theme_linedraw() + 
     theme(legend.position = "right") +
-    labs(title = "Weight Density According to Sex for Each Plot Type", x = "Weight (g)", 
-         y = "Density", fill = "Sex") +
+    labs(title = "Weight Density According to Gender for Each Plot Type", x = "Weight (g)", 
+         y = "Density", fill = "Gender") +
     theme(plot.title = element_text(hjust = 0.5, size = 14)) + 
     theme(axis.text.x = element_text(size = 9)) +
     theme(axis.text.y = element_text(size = 9))
 ```
+Figure 2.6 | Weight density distribution by gender for five different plot types. Most plot type have the density skewed to left, showing the weight distribution of both gender is between 0-100g. Spectab exclosure plot type, however, has male outweighed female. From Control, Rodent Exclosure and Short-term Krat Exclosure plot types, although female has lower density but they are more heavier than the male. 
 
 ```{r Density of hindfoot_length according to sex for each plot type}
 ggplot(rodent_complete, aes(x = hindfoot_length, fill = sex)) +
     geom_density(alpha = 0.6) + facet_wrap(~ plot_type) +
     theme_linedraw() + theme(legend.position = "right") +
-    labs(title = "Hindfoot Length Density According to Sex for Each Plot Type", 
-         x = "Hindfoot Length (cm)", y = "Density", fill = "Sex") +
+    labs(title = "Hindfoot Length Density According to Gender for Each Plot Type", 
+         x = "Hindfoot Length (cm)", y = "Density", fill = "Gender") +
     theme(plot.title = element_text(hjust = 0.5, size = 14)) + 
     theme(axis.text.x = element_text(size = 9)) +
     theme(axis.text.y = element_text(size = 9))
 
 ```
+Figure 2.7 | Hindfoot length density distribution by gender for five different plot types. Similar pattern of density distribution for Control and Rodent Exclosure was observed. Female and male are overlapped in both plots. Spectab exclosure has the male more densely distributed for hindfoot length within the range of 30 - 40 cm. 
 
 ```{r Density of species per year for each plot type}
 rodent_complete <- surveys %>% 
@@ -300,6 +319,7 @@ ggplot(rodent_complete, aes(x = year, fill = species_id)) +
     theme(axis.text.x = element_text(size = 9)) + 
     theme(axis.text.y = element_text(size = 9))
 ```
+Figure 2.8 | Species density distribution by year for five different plot types. Most plot types have species concentrated within the range of year 1985 and 1995. The density of species distribution of Spectab exclosure tends to skewed towards right.
 
 ```{r To correlate hind_foot length and weight according to species_id}
 ggplot(rodent_complete, aes(x = weight, y = hindfoot_length)) + 
@@ -312,6 +332,7 @@ ggplot(rodent_complete, aes(x = weight, y = hindfoot_length)) +
     theme(axis.text.x = element_text(size = 9)) +
     theme(axis.text.y = element_text(size = 9))
 ```
+Figure 2.9 | Correlation of hindfoot length and weight by species IDs.
 
 ```{r Difference between female and male weight}
 surveys_weight_sex <- surveys %>%
@@ -323,12 +344,13 @@ surveys_weight_sex <- surveys %>%
 ```{r Difference between female and male weight graph}
 ggplot(surveys_weight_sex, aes(x = species_id, y = weight)) + 
   geom_boxplot(aes(color = sex)) + theme_classic() + theme(legend.position = "right") +
-    labs(title = "Weight for Male and Female Rodents by Species ID", x = "Species ID", 
-         y = "Average Weight (g)", color = "Sex") +
+    labs(title = "Weight Distribution of Gender by Species ID", x = "Species ID", 
+         y = "Average Weight (g)", color = "Gender") +
     theme(plot.title = element_text(hjust = 0.5, size = 14)) + 
     theme(axis.text.x = element_text(angle = 68, hjust = 1, size = 9)) +
     theme(axis.text.y = element_text(size = 9))
 ```
+Figure 3.0 | Rodent weight distribution for female and male according to species IDs. 
 
 ## Chapter 3. Statistical Analysis
 

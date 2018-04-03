@@ -30,7 +30,8 @@ plot_ly(surveys_taxa, labels = ~taxa, values = ~n, type = 'pie',textposition = '
         textfont = list(color = '#000000', size = 16)) %>%
     layout(title = 'Taxa Distribution', xaxis = list(showgrid = FALSE, zeroline = FALSE, 
                                                      showticklabels = FALSE), 
-           yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+           yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE,
+                        tickformat = "%"))
 
 #to find out what are the species and how many of them for each taxa
 surveys_species <- surveys %>%
@@ -50,12 +51,11 @@ rabbit_species <- surveys_species %>% filter(taxa == "Rabbit") %>%
 reptile_species <- surveys_species %>% filter(taxa == "Reptile") %>% 
     group_by(taxa, species_id) 
 
-#because rodent is the most abundant, show them separately
 #rodent distribution
 rodent_species <- surveys_species %>% filter(taxa == "Rodent") %>% 
     group_by(taxa, species_id) 
 
-#pie chart for each taxa except rodent
+#pie chart for each taxa 
 b <- plot_ly(bird_species, labels = ~species_name, values = ~n, type = 'pie',
              domain = list(x = c(0, 0.5), y = c(0.55, 1)), textposition = 'inside',
              textinfo = 'label+percent', textfont = list(color = '#000000', size = 12)) %>%
@@ -124,6 +124,25 @@ ggplot(surveys_weight, aes(x = year, y = average_weight)) +
 
 #average rodent hindfoot length according to species_id for each taxa
 #note that the only taxon with information about hindfoot length is Rodent (see summary below), so there is only 1 graph
+#distribution of rodents
+plot_ly(rodent_species, labels = ~species_name, values = ~n, type = 'pie',
+        domain = list(x = c(0, 0), y = c(0, 0)), textposition = 'inside',
+        textinfo = 'label+percent') %>%
+    layout(title = "Distribution of Rodents", 
+           xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+           yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+
+ggplot(surveys_taxa_sex, aes(x = sex, y = n)) + 
+    geom_bar(stat = "identity") +
+    theme_classic() + theme(legend.position = "right") +
+    labs(title = "Gender Distribution of Rodents", x = "Gender", y = "Count (n)") +
+    geom_text(aes(label=round(n)), vjust=-0.3, size=3.5) +
+    theme(plot.title = element_text(hjust = 0.5, size = 14)) + 
+    theme(axis.text.x = element_text(size = 9)) +
+    scale_x_discrete(labels = c("Female", "Male")) +
+    theme(axis.text.y = element_text(size = 9))
+
+
 surveys_hfoot_id <- surveys %>%
   filter(!is.na(hindfoot_length), !taxa == "", !species_id == "") %>% 
   group_by(species_id) %>%
@@ -154,13 +173,6 @@ ggplot(aes(x = plot_type, y = hindfoot_length), data = surveys_hfoot_plottype) +
   theme(axis.text.x = element_text(angle = 68, hjust = 1, size = 9)) +
   theme(axis.text.y = element_text(size = 9))
 
-#distribution of rodents
-plot_ly(rodent_species, labels = ~species_name, values = ~n, type = 'pie',
-              domain = list(x = c(0, 0), y = c(0, 0)), textposition = 'inside',
-              textinfo = 'label+percent') %>%
-    layout(title = "Distribution of Rodents", 
-           xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-           yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
 
 #to correlate hindfoot_length and weight of rodent
 rodent_complete <- surveys %>% 
@@ -172,7 +184,13 @@ rodent_genus_year <- rodent_complete %>% select(genus, species_id, year) %>%
     group_by(genus, species_id, year) %>% tally()
 
 spp_year_count <- ggplot(rodent_genus_year, aes(x = year, y = n, fill = species_id)) + 
-    geom_bar(stat = "identity") + theme_classic() + theme(legend.position = "right") +
+    geom_bar(stat = "identity") + 
+    scale_fill_manual(values = c("red", "orange", "yellow", "green", "blue", "pink", 
+                                 "violet", "hotpink", "purple", "plum", "seagreen", "lightblue",
+                                 "cyan", "brown", "blueviolet", "slateblue", "slategrey",
+                                 "magenta", "darksalmon", "deeppink", "lawngreen", "mediumblue",
+                                 "maroon", "royalblue")) +
+    theme_classic() + theme(legend.position = "right") +
     labs(title = "Species Captured According to Year", x = "Year", 
          y = "Count (n)", fill = "Species ID") +
     theme(plot.title = element_text(hjust = 0.5, size = 14)) + 
@@ -185,14 +203,6 @@ surveys_taxa_sex <- surveys %>%
     group_by(taxa, sex) %>% tally()
 #only rodent that had the sex are, the other taxa sex is n/a
 
-ggplot(surveys_taxa_sex, aes(x = sex, y = n)) + 
-    geom_bar(stat = "identity") +
-    theme_classic() + theme(legend.position = "right") +
-    labs(title = "Sex Distribution of Rodents", x = "Sex", y = "Count (n)") +
-    theme(plot.title = element_text(hjust = 0.5, size = 14)) + 
-    theme(axis.text.x = element_text(size = 9)) +
-    scale_x_discrete(labels = c("Female", "Male")) +
-    theme(axis.text.y = element_text(size = 9))
 
 #female and male distribution according to species_id
 rodent_species_sex <- rodent_complete %>% select(species_id, sex) %>%
@@ -200,8 +210,8 @@ rodent_species_sex <- rodent_complete %>% select(species_id, sex) %>%
 
 spp_sex_count <- ggplot(rodent_species_sex, aes(x = species_id, y = log(n), fill = sex)) + 
     geom_bar(stat = "identity") + theme_classic() + theme(legend.position = "right") +
-    labs(title = "Sex Distribution of Species", x = "Species ID", 
-         y = "Count \n log(n)", fill = "Sex") +
+    labs(title = "Gender Distribution of Species", x = "Species ID", 
+         y = "Count \n log(n)", fill = "Gender") +
     theme(plot.title = element_text(hjust = 0.5, size = 14)) + 
     theme(axis.text.x = element_text(angle = 68, hjust = 1, size = 9)) +
     theme(axis.text.y = element_text(size = 9))
@@ -213,8 +223,8 @@ grid.arrange(spp_year_count, spp_sex_count, ncol = 2, widths = c(5,5))
 ggplot(rodent_complete, aes(x = weight, fill = sex)) +
     geom_density(alpha = 0.6) + facet_wrap(~ plot_type) + theme_linedraw() + 
     theme(legend.position = "right") +
-    labs(title = "Weight Density According to Sex for Each Plot Type", x = "Weight (g)", 
-         y = "Density", fill = "Sex") +
+    labs(title = "Weight Density According to Gender for Each Plot Type", x = "Weight (g)", 
+         y = "Density", fill = "Gender") +
     theme(plot.title = element_text(hjust = 0.5, size = 14)) + 
     theme(axis.text.x = element_text(size = 9)) +
     theme(axis.text.y = element_text(size = 9))
@@ -223,8 +233,8 @@ ggplot(rodent_complete, aes(x = weight, fill = sex)) +
 ggplot(rodent_complete, aes(x = hindfoot_length, fill = sex)) +
     geom_density(alpha = 0.6) + facet_wrap(~ plot_type) +
     theme_linedraw() + theme(legend.position = "right") +
-    labs(title = "Hindfoot Length Density According to Sex for Each Plot Type", 
-         x = "Hindfoot Length (cm)", y = "Density", fill = "Sex") +
+    labs(title = "Hindfoot Length Density According to Gender for Each Plot Type", 
+         x = "Hindfoot Length (cm)", y = "Density", fill = "Gender") +
     theme(plot.title = element_text(hjust = 0.5, size = 14)) + 
     theme(axis.text.x = element_text(size = 9)) +
     theme(axis.text.y = element_text(size = 9))
@@ -260,12 +270,12 @@ surveys_weight_sex <- surveys %>%
   mutate(average_weight = mean(weight))
 
 ggplot(surveys_weight_sex, aes(x = species_id, y = weight)) + 
-  geom_boxplot(aes(color = sex)) + theme_classic() + theme(legend.position = "right") +
-  labs(title = "Weight for Male and Female Rodents by Species ID", x = "Species ID", 
-       y = "Average Weight (g)", color = "Sex") +
-  theme(plot.title = element_text(hjust = 0.5, size = 14)) + 
-  theme(axis.text.x = element_text(angle = 68, hjust = 1, size = 9)) +
-  theme(axis.text.y = element_text(size = 9))  
+    geom_boxplot(aes(color = sex)) + theme_classic() + theme(legend.position = "right") +
+    labs(title = "Weight Distribution of Gender by Species ID", x = "Species ID", 
+         y = "Average Weight (g)", color = "Gender") +
+    theme(plot.title = element_text(hjust = 0.5, size = 14)) + 
+    theme(axis.text.x = element_text(angle = 68, hjust = 1, size = 9)) +
+    theme(axis.text.y = element_text(size = 9))  
 
 #========Statistical Analysis===========================
 
