@@ -131,7 +131,7 @@ surveys_taxa_years$year <- as.factor(surveys_taxa_years$year)
 ggplot(surveys_taxa_years, aes(x = year, y = n)) + 
     geom_bar(stat = "identity") + facet_wrap(~taxa, scales = "free_y") +
     theme_linedraw() + theme(legend.position = "right") +
-    labs(title = "Taxa Information According to Year", 
+    labs(title = "Taxa Observations According to Year", 
          x = "Year", y = "Count (n)") +
     theme(plot.title = element_text(hjust = 0.5, size = 14)) + 
     theme(axis.text.x = element_text(angle = 68, hjust = 1, size = 9)) +
@@ -350,7 +350,7 @@ ggplot(surveys_weight_sex, aes(x = species_id, y = weight)) +
     theme(axis.text.x = element_text(angle = 68, hjust = 1, size = 9)) +
     theme(axis.text.y = element_text(size = 9))
 ```
-Figure 3.0 | Rodent weight distribution for female and male according to species IDs. 
+Figure 2.10 | Rodent weight distribution for female and male according to species IDs. 
 
 ## Chapter 3. Statistical Analysis
 
