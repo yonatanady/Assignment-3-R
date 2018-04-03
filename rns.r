@@ -1,3 +1,4 @@
+#Written by Yonatan Ady, Nicole Keefner, and Swan Tan
 #install.packages("knitr")
 #install.packages("plotly")
 library(tidyverse)
@@ -16,6 +17,7 @@ str(surveys)
 summary(surveys)
 
 #========Exploratory Analysis===========================
+
 #overall distribution of the species by taxa
 surveys_taxa <- surveys %>%
     filter(!is.na(taxa)) %>% group_by(taxa) %>% 
@@ -80,7 +82,7 @@ ro <- plot_ly(rodent_species, labels = ~species_name, values = ~n, type = 'pie',
 
 #combined multiple pie charts
 subplot(b, ra, re, ro, nrows = 2, titleX = TRUE) %>% 
-    layout(title = "Distribution of Species according to Taxa", 
+    layout(title = "Distribution of Species According to Taxa", 
            showlegend = FALSE,
            xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
            yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
@@ -96,7 +98,7 @@ surveys_taxa_years$year <- as.factor(surveys_taxa_years$year)
 ggplot(surveys_taxa_years, aes(x = year, y = n)) + 
     geom_bar(stat = "identity") + facet_wrap(~taxa, scales = "free_y") +
     theme_linedraw() + theme(legend.position = "right") +
-    labs(title = "Taxa Information According to Year", 
+    labs(title = "Taxa Observations According to Year", 
          x = "Year", y = "Count (n)") +
     theme(plot.title = element_text(hjust = 0.5, size = 14)) + 
     theme(axis.text.x = element_text(angle = 68, hjust = 1, size = 9)) +
@@ -118,46 +120,45 @@ ggplot(surveys_weight, aes(x = year, y = average_weight)) +
     theme(axis.text.x = element_text(size = 9)) +
     theme(axis.text.y = element_text(size = 9)) 
 
+#=========Analysis based on Rodent=====================
 
 #average rodent hindfoot length according to species_id for each taxa
 #note that the only taxon with information about hindfoot length is Rodent (see summary below), so there is only 1 graph
 surveys_hfoot_id <- surveys %>%
-    filter(!is.na(hindfoot_length), !taxa == "", !species_id == "") %>% 
-    group_by(species_id) %>%
-    mutate(average_hfoot = mean(hindfoot_length))
+  filter(!is.na(hindfoot_length), !taxa == "", !species_id == "") %>% 
+  group_by(species_id) %>%
+  mutate(average_hfoot = mean(hindfoot_length))
 
 summary(as.factor(surveys_hfoot_id$taxa))
 
 ggplot(surveys_hfoot_id, aes(x = species_id, y = average_hfoot)) +
-    theme_classic() + theme(legend.position = "right") +
-    labs(title = "Rodent Hindfoot Length", x = "Species ID", 
-         y = "Hindfoot Length (cm)") + 
-    stat_summary(fun.y = "mean", geom = "bar") +
-    geom_text(aes(label=round(average_hfoot)), vjust=-0.3, size=3.5) +
-    theme(plot.title = element_text(hjust = 0.5, size = 14)) + 
-    theme(axis.text.x = element_text(angle = 68, hjust = 1, size = 9)) +
-    theme(axis.text.y = element_text(size = 9))
+  theme_classic() + theme(legend.position = "right") +
+  labs(title = "Average Rodent Hindfoot Length by Species ID", x = "Species ID", 
+       y = "Hindfoot Length (cm)") + 
+  stat_summary(fun.y = "mean", geom = "bar") +
+  geom_text(aes(label=round(average_hfoot)), vjust=-0.3, size=3.5) +
+  theme(plot.title = element_text(hjust = 0.5, size = 14)) + 
+  theme(axis.text.x = element_text(angle = 68, hjust = 1, size = 9)) +
+  theme(axis.text.y = element_text(size = 9))
 
 #average rodent hindfoot length according to plot type
 surveys_hfoot_plottype <- surveys %>%
-    filter(!is.na(hindfoot_length), !plot_type == "") 
+  filter(!is.na(hindfoot_length), !plot_type == "") 
 
 ggplot(aes(x = plot_type, y = hindfoot_length), data = surveys_hfoot_plottype) + 
-    stat_summary(fun.y = "mean", geom = "bar") + theme_classic() + 
-    theme(legend.position = "right") +
-    labs(title = "Average Rodent Hindfoot Length by Plot Type", x = "Plot Type", 
-         y = "Hindfoot Length (cm)") +
-    theme(plot.title = element_text(hjust = 0.5, size = 14)) + 
-    theme(axis.text.x = element_text(angle = 68, hjust = 1, size = 9)) +
-    theme(axis.text.y = element_text(size = 9))
+  stat_summary(fun.y = "mean", geom = "bar") + theme_classic() + 
+  theme(legend.position = "right") +
+  labs(title = "Average Rodent Hindfoot Length by Plot Type", x = "Plot Type", 
+       y = "Hindfoot Length (cm)") +
+  theme(plot.title = element_text(hjust = 0.5, size = 14)) + 
+  theme(axis.text.x = element_text(angle = 68, hjust = 1, size = 9)) +
+  theme(axis.text.y = element_text(size = 9))
 
-
-#=========Analysis based on Rodent=====================
-#distribution of rodent
+#distribution of rodents
 plot_ly(rodent_species, labels = ~species_name, values = ~n, type = 'pie',
               domain = list(x = c(0, 0), y = c(0, 0)), textposition = 'inside',
               textinfo = 'label+percent') %>%
-    layout(title = "Distribution of Rodent", 
+    layout(title = "Distribution of Rodents", 
            xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
            yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
 
@@ -172,7 +173,7 @@ rodent_genus_year <- rodent_complete %>% select(genus, species_id, year) %>%
 
 spp_year_count <- ggplot(rodent_genus_year, aes(x = year, y = n, fill = species_id)) + 
     geom_bar(stat = "identity") + theme_classic() + theme(legend.position = "right") +
-    labs(title = "Species Captured according to Year", x = "Year", 
+    labs(title = "Species Captured According to Year", x = "Year", 
          y = "Count (n)", fill = "Species ID") +
     theme(plot.title = element_text(hjust = 0.5, size = 14)) + 
     theme(axis.text.x = element_text(angle = 68, hjust = 1, size = 9)) +
@@ -187,7 +188,7 @@ surveys_taxa_sex <- surveys %>%
 ggplot(surveys_taxa_sex, aes(x = sex, y = n)) + 
     geom_bar(stat = "identity") +
     theme_classic() + theme(legend.position = "right") +
-    labs(title = "Sex Distribution of Rodent", x = "Sex", y = "Count (n)") +
+    labs(title = "Sex Distribution of Rodents", x = "Sex", y = "Count (n)") +
     theme(plot.title = element_text(hjust = 0.5, size = 14)) + 
     theme(axis.text.x = element_text(size = 9)) +
     scale_x_discrete(labels = c("Female", "Male")) +
@@ -212,7 +213,7 @@ grid.arrange(spp_year_count, spp_sex_count, ncol = 2, widths = c(5,5))
 ggplot(rodent_complete, aes(x = weight, fill = sex)) +
     geom_density(alpha = 0.6) + facet_wrap(~ plot_type) + theme_linedraw() + 
     theme(legend.position = "right") +
-    labs(title = "Weight Density according to Sex for Each Plot Type", x = "Weight", 
+    labs(title = "Weight Density According to Sex for Each Plot Type", x = "Weight (g)", 
          y = "Density", fill = "Sex") +
     theme(plot.title = element_text(hjust = 0.5, size = 14)) + 
     theme(axis.text.x = element_text(size = 9)) +
@@ -222,7 +223,7 @@ ggplot(rodent_complete, aes(x = weight, fill = sex)) +
 ggplot(rodent_complete, aes(x = hindfoot_length, fill = sex)) +
     geom_density(alpha = 0.6) + facet_wrap(~ plot_type) +
     theme_linedraw() + theme(legend.position = "right") +
-    labs(title = "Hindfoot Length Density according to Sex for Each Plot Type", 
+    labs(title = "Hindfoot Length Density According to Sex for Each Plot Type", 
          x = "Hindfoot Length (cm)", y = "Density", fill = "Sex") +
     theme(plot.title = element_text(hjust = 0.5, size = 14)) + 
     theme(axis.text.x = element_text(size = 9)) +
@@ -246,14 +247,11 @@ ggplot(rodent_complete, aes(x = weight, y = hindfoot_length)) +
     geom_point(aes(color = species_id)) +
     geom_smooth(method = "lm", se = FALSE, color = 'maroon') +
     theme_classic() + theme(legend.position = "right") +
-    labs(title = "Relationship between Hindfoot Length and Weight of Species", 
+    labs(title = "Relationship between Hindfoot Length and Weight of Rodent Species", 
          x = "Weight (g)", y = "Hindfoot Length (cm)", color = "Species ID") +
     theme(plot.title = element_text(hjust = 0.5, size = 14)) + 
     theme(axis.text.x = element_text(size = 9)) +
     theme(axis.text.y = element_text(size = 9))
-
-
-#========Statistical Analysis===========================
 
 #difference between female and male weight
 surveys_weight_sex <- surveys %>%
@@ -263,12 +261,35 @@ surveys_weight_sex <- surveys %>%
 
 ggplot(surveys_weight_sex, aes(x = species_id, y = weight)) + 
   geom_boxplot(aes(color = sex)) + theme_classic() + theme(legend.position = "right") +
-    labs(title = "Comparison Between Female \nand Male Weight", x = "Species ID", 
-         y = "Average Weight (g)", color = "Sex") +
-    theme(plot.title = element_text(hjust = 0.5, size = 14)) + 
-    theme(axis.text.x = element_text(angle = 68, hjust = 1, size = 9)) +
-    theme(axis.text.y = element_text(size = 9))  
+  labs(title = "Weight for Male and Female Rodents by Species ID", x = "Species ID", 
+       y = "Average Weight (g)", color = "Sex") +
+  theme(plot.title = element_text(hjust = 0.5, size = 14)) + 
+  theme(axis.text.x = element_text(angle = 68, hjust = 1, size = 9)) +
+  theme(axis.text.y = element_text(size = 9))  
 
-#Linear regression for graph line 245
-#t-test for overall mean male vs. overall mean female weights
-#ANOVA/Tukey tests for mean weights of different species
+#========Statistical Analysis===========================
+
+#Student's t-test for overall mean male vs. overall mean female weights line 264
+Rodent_Female <- filter(surveys_weight_sex, sex=='F')
+Rodent_Male <- filter(surveys_weight_sex, sex=='M')
+t.test(Rodent_Female$weight, Rodent_Male$weight)
+# Reject null hypothesis that the mean weights of the two sexes are the same.
+
+#Linear regression for hindfoot length vs. weight
+fit1 <- lm(hindfoot_length ~ weight, data = rodent_complete)
+summary(fit1)
+# Reject null hypothesis that the slope of the linear regression model 
+# does not differ significantly from zero.
+
+#tests for mean hindfoot lengths of different species
+# Evaluate assumptions of ANOVA (homogeneity of variance)
+# Bartlett Test of Homogeneity of Variances
+bartlett.test(hindfoot_length~species_id, data=surveys_hfoot_id)
+# Reject the null that variances of the levels of species id are equal.
+# Does not meet assumptions, so non-parametric alternative used
+#Kruskal-Wallis rank sum test
+kruskal.test(hindfoot_length~as.factor(species_id), data=surveys_hfoot_id)
+# Reject null hypothesis that all species have the same average hindfoot lengths.
+#non-parametric Pairwise Wilcoxon Rank Sum Tests to determine which species differ from one another.
+pairwise.wilcox.test(surveys_hfoot_id$hindfoot_length, as.factor(surveys_hfoot_id$species_id))
+# pairs with values <0.05 are significantly different from each other and we reject the null that the group means are the same
