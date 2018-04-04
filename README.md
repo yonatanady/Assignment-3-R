@@ -35,7 +35,7 @@
 
 >Chapter 3. Statistical Analysis.
 
-The report html link is as below :
+The HTML link of the report is as below :
 <dl>
   <dt>file:///Users/tanswan/Desktop/Assignment-3-R/RNS.html</dt>
 </dl>
