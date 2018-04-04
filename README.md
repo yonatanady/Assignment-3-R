@@ -36,8 +36,6 @@
 >Chapter 3. Statistical Analysis.
 
 The report html link :
-[This link](file:///Users/tanswan/Desktop/Assignment-3-R/RNS.html)
 <dl>
   <dt>file:///Users/tanswan/Desktop/Assignment-3-R/RNS.html</dt>
-  <dd>Is something people use sometimes.</dd>
 </dl>
