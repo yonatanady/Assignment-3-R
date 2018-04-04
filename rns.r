@@ -132,6 +132,12 @@ plot_ly(rodent_species, labels = ~species_name, values = ~n, type = 'pie',
            xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
            yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
 
+#sex information according to taxa
+surveys_taxa_sex <- surveys %>%
+    filter(!is.na(sex)) %>% select(taxa,sex) %>%
+    group_by(taxa, sex) %>% tally()
+#only rodent that had the sex are, the other taxa sex is n/a
+
 ggplot(surveys_taxa_sex, aes(x = sex, y = n)) + 
     geom_bar(stat = "identity") +
     theme_classic() + theme(legend.position = "right") +
@@ -141,7 +147,6 @@ ggplot(surveys_taxa_sex, aes(x = sex, y = n)) +
     theme(axis.text.x = element_text(size = 9)) +
     scale_x_discrete(labels = c("Female", "Male")) +
     theme(axis.text.y = element_text(size = 9))
-
 
 surveys_hfoot_id <- surveys %>%
   filter(!is.na(hindfoot_length), !taxa == "", !species_id == "") %>% 
@@ -196,12 +201,6 @@ spp_year_count <- ggplot(rodent_genus_year, aes(x = year, y = n, fill = species_
     theme(plot.title = element_text(hjust = 0.5, size = 14)) + 
     theme(axis.text.x = element_text(angle = 68, hjust = 1, size = 9)) +
     theme(axis.text.y = element_text(size = 9))
-
-#sex information according to taxa
-surveys_taxa_sex <- surveys %>%
-    filter(!is.na(sex)) %>% select(taxa,sex) %>%
-    group_by(taxa, sex) %>% tally()
-#only rodent that had the sex are, the other taxa sex is n/a
 
 
 #female and male distribution according to species_id
@@ -282,7 +281,8 @@ ggplot(surveys_weight_sex, aes(x = species_id, y = weight)) +
 #Student's t-test for overall mean male vs. overall mean female weights line 264
 Rodent_Female <- filter(surveys_weight_sex, sex=='F')
 Rodent_Male <- filter(surveys_weight_sex, sex=='M')
-t.test(Rodent_Female$weight, Rodent_Male$weight)
+t_test <- t.test(Rodent_Female$weight, Rodent_Male$weight)
+t_test$p.value
 # Reject null hypothesis that the mean weights of the two sexes are the same.
 
 #Linear regression for hindfoot length vs. weight
@@ -294,11 +294,13 @@ summary(fit1)
 #tests for mean hindfoot lengths of different species
 # Evaluate assumptions of ANOVA (homogeneity of variance)
 # Bartlett Test of Homogeneity of Variances
-bartlett.test(hindfoot_length~species_id, data=surveys_hfoot_id)
+bartlett <- bartlett.test(hindfoot_length~species_id, data=surveys_hfoot_id)
+bartlett$p.value
 # Reject the null that variances of the levels of species id are equal.
 # Does not meet assumptions, so non-parametric alternative used
 #Kruskal-Wallis rank sum test
-kruskal.test(hindfoot_length~as.factor(species_id), data=surveys_hfoot_id)
+kruskal <- kruskal.test(hindfoot_length~as.factor(species_id), data=surveys_hfoot_id)
+kruskal$p.value
 # Reject null hypothesis that all species have the same average hindfoot lengths.
 #non-parametric Pairwise Wilcoxon Rank Sum Tests to determine which species differ from one another.
 pairwise.wilcox.test(surveys_hfoot_id$hindfoot_length, as.factor(surveys_hfoot_id$species_id))
