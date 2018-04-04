@@ -29,11 +29,11 @@
 
 - In the Rmarkdown report will summarize what we have done for this group assignment. There are 3 separate chapters that we use to group our work :
 
-Chapter 1. Exploratory Analysis.
+>Chapter 1. Exploratory Analysis.
 
-Chapter 2. Analysis based on Rodent.
+>Chapter 2. Analysis based on Rodent.
 
-Chapter 3. Statistical Analysis.
+>Chapter 3. Statistical Analysis.
 
 The report html link :
-<a href="https://www.cdc.gov/flu/protect/vaccine/vaccines.htm">HTML LINK</a>
+[This link](file:///Users/tanswan/Desktop/Assignment-3-R/RNS.html)
