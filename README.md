@@ -37,5 +37,5 @@
 
 The HTML link of the report is as below :
 <dl>
-  <dt>file:///Users/tanswan/Desktop/Assignment-3-R/RNS.html</dt>
+  <dt>https://github.com/yonatanady/Assignment-3-R/blob/master/RNS.Rmd</dt>
 </dl>
