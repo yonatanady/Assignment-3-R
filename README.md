@@ -11,9 +11,7 @@
 
 - Working steps on the given assignment:
 
-1. Download the working data from <dl>
-  <dt>https://ndownloader.figshare.com/files/2292169</dt>
-</dl>
+1. Download the working data from <dt>https://ndownloader.figshare.com/files/2292169</dt>
 
 2. Load the data
 
