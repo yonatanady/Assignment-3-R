@@ -3,37 +3,37 @@
 
 - In this repository you will find :
 
-1. rns.r file, a R script file that we worked together.
+1. rns.r file, a R script file.
 
-2. RNS.Rmd file, a Rmarkdown file that will describe the result of the code that we worked at R script
+2. RNS.Rmd file, a Rmarkdown file that contains documentation of coding and the respective outputs. 
 
-3. RNS.html file, a Rmarkdown file that you can open without using Rstudio application
+3. RNS.html file, a HTML version of Rmarkdown file. 
 
-- Our assignment is "Working with data and writing a report using R" 
+- Working steps on the given assignment:
 
-- We are working with several task, which is :
+1. Download the working data from <dl>
+  <dt>https://ndownloader.figshare.com/files/2292169</dt>
+</dl>
 
-1. Load the data
+2. Load the data
 
-2. Contain plots that illustrate relationships between variables and cases where relationships do not exist
+3. Contain plots that illustrate relationships between variables and cases where relationships do not exist
 
-3. Contain plots with data divided by category as needed
+4. Contain plots with data divided by category as needed
 
-4. Include captions and descriptions of plots
+5. Include captions and descriptions of plots
 
-5. Show only informative output (not code or raw results)
+6. Show only informative output (not code or raw results)
 
-6. Format text and results appropriately including headers and inline code.
+7. Format text and results appropriately including headers and inline code.
 
-7. Include R-squared and p-values as necessary to support relationships. That should be written in text not output as raw results.
+8. Include R-squared and p-values as necessary to support relationships. That should be written in text not output as raw results.
 
 - In the Rmarkdown report will summarize what we have done for this group assignment. There are 3 separate chapters that we use to group our work :
 
->Chapter 1. Exploratory Analysis.
+>Chapter 1. Exploratory Analysis
 
->Chapter 2. Analysis based on Rodent.
-
->Chapter 3. Statistical Analysis.
+>Chapter 2. Statistical Analysis based on Rodent
 
 The HTML link of the report is as below :
 <dl>
