@@ -23,7 +23,6 @@ download.file("https://ndownloader.figshare.com/files/2292169", "data/portal_dat
 surveys <- read_csv("data/portal_data_joined.csv")
 ```
 
-
 ## Working with data and writing a report using R
 
 This report will summarize what we have done for this group assignment.
@@ -31,10 +30,11 @@ There are 3 separate chapters that we use to group our work :
 
 1. Exploratory Analysis.
 
-2. Analysis based on Rodent.
+2. Statistical Analysis based on Rodent.
 
-3. Statistical Analysis.
-
+```{r Identify variables of interest}
+summary(surveys)
+```
 
 ## Chapter 1. Exploratory Analysis
 
@@ -158,7 +158,7 @@ ggplot(surveys_weight, aes(x = year, y = average_weight)) +
 ```
 Figure 1.4 | Species average weight distribution from the year 1977 to 2002. Only rodent has the complete information on average weight, hence the species IDs herein refer to the species from rodent taxon. Most species have low average weight, i.e. below 50g and not every species has consistent distribution from the year 1977 to 2002. NL has the maximum of average weight among others and shows consistent distribution throughout the years. 
 
-## Chapter 2. Analysis based on Rodent Data
+## Chapter 2. Statistical Analysis based on Rodent Data
 
 Based on preliminary investigations, we determined that Rodent was the only taxon for which hindfoot length or sex were recorded. Because of this, any graphs including information about hindfoot length or sex will be strictly for rodent species in the study. The number of rodents in the study is below.
 
@@ -212,6 +212,23 @@ ggplot(surveys_hfoot_id, aes(x = species_id, y = average_hfoot)) +
     theme(axis.text.y = element_text(size = 9))
 ```
 Figure 2.3 | The bar plot showed average hindfoot length by rodent species ID. DS has the longest average hindfoot length, i.e. 50cm, whereas BA has the shortest, i.e. 13cm. Most of the species are within the range of 18-22cm. 
+
+This suggests hindfoot length (cm) is different according to species ID. We conducted several tests to determine if this was the case. We began by conducting a Bartlett Test of Homogeneity of Variances to evaluate the homogeneity of variance assumption of ANOVA.
+```{r Bartlett Test}
+bartlett <- bartlett.test(hindfoot_length~species_id, data=surveys_hfoot_id)
+bartlett
+```
+Because the p-value (`r bartlett$p.value`) is less than the alpha of 0.05, we reject the null hypothesis that variances of the levels of species ID are equal. Because of this, we know our data does not meet the assumptions of the ANOVA and a non-parametric alternative must be used. In this case, we used a Kruskal-Wallis rank sum test.
+
+```{r Kruskal-Wallis rank sum test}
+kruskal <- kruskal.test(hindfoot_length~as.factor(species_id), data=surveys_hfoot_id)
+kruskal
+```
+Because the p-value (`r kruskal$p.value`) is less than the alpha of 0.05, we reject the null hypothesis that all species have the same average hindfoot lengths. However, this test did not inform us as to which species are different from which others. In order to determine this, we conducted a non-parametric Pairwise Wilcoxon rank sum test. In the output below, pairs with values <0.05 are significantly different from each other and we reject the null that the group means are the same.
+```{r Pairwise Wilcoxon Rank Sum Tests}
+pairwise.wilcox.test(surveys_hfoot_id$hindfoot_length, as.factor(surveys_hfoot_id$species_id))
+```
+
 
 ```{r Average rodent hindfoot length according to plot type}
 surveys_hfoot_plottype <- surveys %>%
@@ -334,6 +351,13 @@ ggplot(rodent_complete, aes(x = weight, y = hindfoot_length)) +
 ```
 Figure 2.9 | Correlation of hindfoot length and weight by species IDs.
 
+This suggests there is a relationship between hindfoot length (cm) and weight (g) in rodents. We created a linear model to determine if there is indeed a relationship between these variables.
+```{r Linear regression}
+fit1 <- lm(hindfoot_length ~ weight, data = rodent_complete)
+summary(fit1)
+```
+Because the p-value is less than the alpha of 0.05, we reject the null hypothesis that the slope of the linear regression model does not differ significantly from zero. In addition, the multiple R-squared value is used to describe how well a given model explains variation in the data. In this case, this model explains 46.73% of the variation in the data.
+
 ```{r Difference between female and male weight}
 surveys_weight_sex <- surveys %>%
   filter(!is.na(year), !is.na(weight), !is.na(sex), !species_id == "") %>%
@@ -352,9 +376,7 @@ ggplot(surveys_weight_sex, aes(x = species_id, y = weight)) +
 ```
 Figure 2.10 | Rodent weight distribution for female and male according to species IDs. 
 
-## Chapter 3. Statistical Analysis
-
-Figure 2.10 suggests there is a relationship between sex and weight (g) in rodents. We conducted a Student's t-test to compare the weights of males to that of females.
+This suggests there is a relationship between sex and weight (g) in rodents. We conducted a Student's t-test to compare the weights of males to that of females.
 ```{r Students t-test}
 Rodent_Female <- filter(surveys_weight_sex, sex=='F')
 Rodent_Male <- filter(surveys_weight_sex, sex=='M')
@@ -362,29 +384,3 @@ t_test <- t.test(Rodent_Female$weight, Rodent_Male$weight)
 t_test
 ```
 Because the p-value (`r t_test$p.value`) is less than the alpha of 0.05, we reject the null hypothesis that the mean weights of the two sexes are the same. In the output above, "mean of x" is the mean of females and "mean of y" is the mean of males.
-
-Figure 2.9 suggests there is a relationship between hindfoot length (cm) and weight (g) in rodents. We created a linear model to determine if there is indeed a relationship between these variables.
-```{r Linear regression}
-fit1 <- lm(hindfoot_length ~ weight, data = rodent_complete)
-summary(fit1)
-```
-Because the p-value is less than the alpha of 0.05, we reject the null hypothesis that the slope of the linear regression model does not differ significantly from zero. In addition, the multiple R-squared value is used to describe how well a given model explains variation in the data. In this case, this model explains 46.73% of the variation in the data.
-
-Figure 2.3 suggests hindfoot length (cm) is different according to species ID. We conducted several tests to determine if this was the case. We began by conducting a Bartlett Test of Homogeneity of Variances to evaluate the homogeneity of variance assumption of ANOVA.
-```{r Bartlett Test}
-bartlett <- bartlett.test(hindfoot_length~species_id, data=surveys_hfoot_id)
-bartlett
-```
-Because the p-value (`r bartlett$p.value`) is less than the alpha of 0.05, we reject the null hypothesis that variances of the levels of species ID are equal. Because of this, we know our data does not meet the assumptions of the ANOVA and a non-parametric alternative must be used. In this case, we used a Kruskal-Wallis rank sum test.
-
-```{r Kruskal-Wallis rank sum test}
-kruskal <- kruskal.test(hindfoot_length~as.factor(species_id), data=surveys_hfoot_id)
-kruskal
-```
-Because the p-value (`r kruskal$p.value`) is less than the alpha of 0.05, we reject the null hypothesis that all species have the same average hindfoot lengths. However, this test did not inform us as to which species are different from which others. In order to determine this, we conducted a non-parametric Pairwise Wilcoxon rank sum test. In the output below, pairs with values <0.05 are significantly different from each other and we reject the null that the group means are the same.
-```{r Pairwise Wilcoxon Rank Sum Tests}
-pairwise.wilcox.test(surveys_hfoot_id$hindfoot_length, as.factor(surveys_hfoot_id$species_id))
-```
-
-
-
