@@ -13,7 +13,7 @@
 
 1. Make sure R studio is installed and proceed to creating a new R project and a new folder named 'data' under the same directory.
 
-2. Download the working data from <a href="https://ndownloader.figshare.com/files/2292169">here</a> and put it in the newly created 'data' folder.
+2. Download the working data <a href="https://ndownloader.figshare.com/files/2292169">here</a> and put it in the newly created 'data' folder.
 
 3. Load the working data in R studio.
 
