@@ -7,7 +7,9 @@
 
 2. RNS.Rmd file, a R markdown file that contains documentation of coding and the respective outputs. 
 
-3. RNS.html file, a HTML version of Rmarkdown file. 
+3. RNS.html file, a HTML version of Rmarkdown file.
+
+4. RNS.pdf file, a PDF version of Rmarkdown file. 
 
 - Working steps on the given assignment:
 
