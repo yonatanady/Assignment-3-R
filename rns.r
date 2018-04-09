@@ -305,3 +305,18 @@ kruskal$p.value
 #non-parametric Pairwise Wilcoxon Rank Sum Tests to determine which species differ from one another.
 pairwise.wilcox.test(surveys_hfoot_id$hindfoot_length, as.factor(surveys_hfoot_id$species_id))
 # pairs with values <0.05 are significantly different from each other and we reject the null that the group means are the same
+
+#tests for mean hindfoot lengths of rodents for different plot types
+# Evaluate assumptions of ANOVA (homogeneity of variance)
+# Bartlett Test of Homogeneity of Variances
+bartlett <- bartlett.test(hindfoot_length~plot_type, data=surveys_hfoot_plottype)
+bartlett$p.value
+# Reject the null that variances of the levels of plot type are equal.
+# Does not meet assumptions, so non-parametric alternative used
+#Kruskal-Wallis rank sum test
+kruskal <- kruskal.test(hindfoot_length~as.factor(plot_type), data=surveys_hfoot_plottype)
+kruskal$p.value
+# Reject null hypothesis that all plot types have the same average hindfoot lengths.
+#non-parametric Pairwise Wilcoxon Rank Sum Tests to determine which plot types differ from one another.
+pairwise.wilcox.test(surveys_hfoot_plottype$hindfoot_length, as.factor(surveys_hfoot_plottype$plot_type))
+# pairs with values <0.05 are significantly different from each other and we reject the null that the group means are the same
