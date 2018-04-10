@@ -23,7 +23,9 @@
 
 5. Make plots and illustrate relationships and statistical inferences between variables.
 
-6. Generate R markdown.
+6. Be sure to install all of the necessary packages including the package "Hmisc".
+
+7. Generate R markdown.
 
 - An overview of the report:
 
