@@ -15,7 +15,6 @@ library(tidyverse)
 library(gridExtra)
 library(knitr)
 library(plotly)
-library(ggpubr)
 ```
 
 ```{r data}

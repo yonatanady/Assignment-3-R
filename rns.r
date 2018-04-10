@@ -1,12 +1,12 @@
 #Written by Yonatan Ady, Nicole Keefner, and Swan Tan
 #install.packages("knitr")
 #install.packages("plotly")
-install.packages("ggpubr")
+install.packages("Hmisc")
 library(tidyverse)
 library(gridExtra)
 library(knitr)
 library(plotly)
-library(ggpubr)
+library(Hmisc)
 
 #not sure if we need this part, but at the moment i put it here first
 #downloading data
