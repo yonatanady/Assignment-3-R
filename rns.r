@@ -150,39 +150,26 @@ ggplot(surveys_taxa_sex, aes(x = sex, y = n)) +
     scale_x_discrete(labels = c("Female", "Male")) +
     theme(axis.text.y = element_text(size = 9))
 
-#average rodent hindfoot length by species ID and gender
-#remove columns containig NAs, and 
-#species id == "PX" because of insufficient data of that species
+#average rodent hindfoot length by species ID
 surveys_hfoot_id <- surveys %>%
     filter(!is.na(hindfoot_length), !is.na(sex), !species_id == "", !species_id == "PX") %>% 
-    group_by(species_id) %>%
-    select(species_id, hindfoot_length, sex) 
+    select(species_id, hindfoot_length) %>% group_by(species_id)
 
-data_summary <- function(data, varname, groupnames){
-    require(plyr)
-    summary_func <- function(x, col){
-        c(mean = mean(x[[col]], na.rm=TRUE),
-          sd = sd(x[[col]], na.rm=TRUE))
-    }
-    data_sum<-ddply(data, groupnames, .fun=summary_func,
-                    varname)
-    data_sum <- rename(data_sum, c("mean" = varname))
-    return(data_sum)
-}
-df2 <- data_summary(surveys_hfoot_id, varname="hindfoot_length", 
-                    groupnames=c("species_id", "sex"))
-# Convert dose to a factor variable
-df2$sex = as.factor(df2$sex)
-head(df2)
+surveys_hfoot_id_mean <- aggregate(surveys_hfoot_id[, 2], 
+                                   list(surveys_hfoot_id$species_id), mean)
+surveys_hfoot_id_sd <- aggregate(surveys_hfoot_id[, 2], 
+                                 list(surveys_hfoot_id$species_id), sd)
+hfl_summary <- cbind(surveys_hfoot_id_mean, surveys_hfoot_id_sd)
+hfl_summary <- hfl_summary[,-3]
+colnames(hfl_summary) <- c("species_id", "hfl_mean", "hfl_sd")
 
-ggplot(df2, aes(x = species_id, y = hindfoot_length, fill = sex)) + 
-    geom_bar(stat="identity", color="black", 
-             position=position_dodge()) +
-    geom_errorbar(aes(ymin=hindfoot_length-sd, ymax=hindfoot_length+sd), width=.2,
-                  position=position_dodge(.9)) +
-    labs(title= "Rodent Hindfoot Length by Species ID and Gender", 
-         x="Species ID", y = "Hindfoot Length (cm)", fill = "Gender") +
-    theme_classic() + #geom_text(aes(label=round(hindfoot_length)), vjust=-0.3, size=3.5) +
+head(hfl_summary)
+
+ggplot(hfl_summary, aes(x = species_id, y = hfl_mean)) + 
+    geom_bar(stat = "identity") + theme_classic() + theme(legend.position = "right") +
+    labs(title = "Average Rodent Hindfoot Length by Species ID", x = "Species ID", 
+         y = "Hindfoot Length (cm)") +
+    geom_errorbar(aes(ymin = hfl_mean - hfl_sd, ymax = hfl_mean + hfl_sd), width=0.2) +
     theme(plot.title = element_text(hjust = 0.5, size = 14)) + 
     theme(axis.text.x = element_text(angle = 68, hjust = 1, size = 9)) +
     theme(axis.text.y = element_text(size = 9))
