@@ -1,10 +1,12 @@
 #Written by Yonatan Ady, Nicole Keefner, and Swan Tan
 #install.packages("knitr")
 #install.packages("plotly")
+install.packages("ggpubr")
 library(tidyverse)
 library(gridExtra)
 library(knitr)
 library(plotly)
+library(ggpubr)
 
 #not sure if we need this part, but at the moment i put it here first
 #downloading data
@@ -148,35 +150,58 @@ ggplot(surveys_taxa_sex, aes(x = sex, y = n)) +
     scale_x_discrete(labels = c("Female", "Male")) +
     theme(axis.text.y = element_text(size = 9))
 
+#average rodent hindfoot length by species ID and gender
+#remove columns containig NAs, and 
+#species id == "PX" because of insufficient data of that species
 surveys_hfoot_id <- surveys %>%
-  filter(!is.na(hindfoot_length), !taxa == "", !species_id == "") %>% 
-  group_by(species_id) %>%
-  mutate(average_hfoot = mean(hindfoot_length))
+    filter(!is.na(hindfoot_length), !is.na(sex), !species_id == "", !species_id == "PX") %>% 
+    group_by(species_id) %>%
+    select(species_id, hindfoot_length, sex) 
 
-summary(as.factor(surveys_hfoot_id$taxa))
+data_summary <- function(data, varname, groupnames){
+    require(plyr)
+    summary_func <- function(x, col){
+        c(mean = mean(x[[col]], na.rm=TRUE),
+          sd = sd(x[[col]], na.rm=TRUE))
+    }
+    data_sum<-ddply(data, groupnames, .fun=summary_func,
+                    varname)
+    data_sum <- rename(data_sum, c("mean" = varname))
+    return(data_sum)
+}
+df2 <- data_summary(surveys_hfoot_id, varname="hindfoot_length", 
+                    groupnames=c("species_id", "sex"))
+# Convert dose to a factor variable
+df2$sex = as.factor(df2$sex)
+head(df2)
 
-ggplot(surveys_hfoot_id, aes(x = species_id, y = average_hfoot)) +
-  theme_classic() + theme(legend.position = "right") +
-  labs(title = "Average Rodent Hindfoot Length by Species ID", x = "Species ID", 
-       y = "Hindfoot Length (cm)") + 
-  stat_summary(fun.y = "mean", geom = "bar") +
-  geom_text(aes(label=round(average_hfoot)), vjust=-0.3, size=3.5) +
-  theme(plot.title = element_text(hjust = 0.5, size = 14)) + 
-  theme(axis.text.x = element_text(angle = 68, hjust = 1, size = 9)) +
-  theme(axis.text.y = element_text(size = 9))
-
+ggplot(df2, aes(x = species_id, y = hindfoot_length, fill = sex)) + 
+    geom_bar(stat="identity", color="black", 
+             position=position_dodge()) +
+    geom_errorbar(aes(ymin=hindfoot_length-sd, ymax=hindfoot_length+sd), width=.2,
+                  position=position_dodge(.9)) +
+    labs(title= "Rodent Hindfoot Length by Species ID and Gender", 
+         x="Species ID", y = "Hindfoot Length (cm)", fill = "Gender") +
+    theme_classic() + #geom_text(aes(label=round(hindfoot_length)), vjust=-0.3, size=3.5) +
+    theme(plot.title = element_text(hjust = 0.5, size = 14)) + 
+    theme(axis.text.x = element_text(angle = 68, hjust = 1, size = 9)) +
+    theme(axis.text.y = element_text(size = 9))
+ 
 #average rodent hindfoot length according to plot type
 surveys_hfoot_plottype <- surveys %>%
-  filter(!is.na(hindfoot_length), !plot_type == "") 
+    filter(!is.na(hindfoot_length), !plot_type == "") 
 
 ggplot(aes(x = plot_type, y = hindfoot_length), data = surveys_hfoot_plottype) + 
-  stat_summary(fun.y = "mean", geom = "bar") + theme_classic() + 
-  theme(legend.position = "right") +
-  labs(title = "Average Rodent Hindfoot Length by Plot Type", x = "Plot Type", 
-       y = "Hindfoot Length (cm)") +
-  theme(plot.title = element_text(hjust = 0.5, size = 14)) + 
-  theme(axis.text.x = element_text(angle = 68, hjust = 1, size = 9)) +
-  theme(axis.text.y = element_text(size = 9))
+    stat_summary(fun.y = "mean", geom = "bar") + theme_classic() + 
+    theme(legend.position = "right") +
+    labs(title = "Average Rodent Hindfoot Length by Plot Type", x = "Plot Type", 
+         y = "Hindfoot Length (cm)") +
+    theme(plot.title = element_text(hjust = 0.5, size = 14)) + 
+    theme(axis.text.x = element_text(angle = 68, hjust = 1, size = 9)) +
+    theme(axis.text.y = element_text(size = 9)) +
+    stat_summary(fun.data=mean_sdl, fun.args = list(mult=1), 
+                 geom="errorbar", color="black", width=0.1) +
+    stat_summary(fun.y=mean, geom="point", color="black")
 
 
 #to correlate hindfoot_length and weight of rodent

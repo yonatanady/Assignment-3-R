@@ -15,6 +15,7 @@ library(tidyverse)
 library(gridExtra)
 library(knitr)
 library(plotly)
+library(ggpubr)
 ```
 
 ```{r data}
@@ -26,15 +27,19 @@ surveys <- read_csv("data/portal_data_joined.csv")
 ## Working with data and writing a report using R
 
 This report will summarize what we have done for this group assignment.
-There are 3 separate chapters that we use to group our work :
+There are 2 separate chapters that we use to group our work :
 
 1. Exploratory Analysis.
 
 2. Statistical Analysis based on Rodent.
 
+
+Identify potential variables of interest: 
+
 ```{r Identify variables of interest}
 summary(surveys)
 ```
+
 
 ## Chapter 1. Exploratory Analysis
 
@@ -189,29 +194,48 @@ ggplot(surveys_taxa_sex, aes(x = sex, y = n)) +
     scale_x_discrete(labels = c("Female", "Male")) +
     theme(axis.text.y = element_text(size = 9))
 ```
-Figure 2.2 | The bar plot shows gender distribution of rodents. There are 17,348 of male and 15,690 of female. Male has a higher count of 1,658 than female. 
+Figure 2.2 | The bar plot shows gender distribution of rodents. There are 17348 of male and 15690 of female. Male has a higher count of 1658 than female. 
 
-```{r Average rodent hindfoot length according to species_id for each taxa}
+```{r Average rodent hindfoot length according to species_id and gender}
 surveys_hfoot_id <- surveys %>%
-    filter(!is.na(hindfoot_length), !taxa == "", !species_id == "") %>% 
+    filter(!is.na(hindfoot_length), !is.na(sex), !species_id == "", !species_id == "PX") %>% 
     group_by(species_id) %>%
-    mutate(average_hfoot = mean(hindfoot_length))
+    select(species_id, hindfoot_length, sex)
+```
 
-summary(as.factor(surveys_hfoot_id$taxa))
+```{r Create function to calculate meand and sd}
+data_summary <- function(data, varname, groupnames){
+    require(plyr)
+    summary_func <- function(x, col){
+        c(mean = mean(x[[col]], na.rm=TRUE),
+          sd = sd(x[[col]], na.rm=TRUE))
+    }
+    data_sum<-ddply(data, groupnames, .fun=summary_func,
+                    varname)
+    data_sum <- rename(data_sum, c("mean" = varname))
+    return(data_sum)
+}
+df2 <- data_summary(surveys_hfoot_id, varname="hindfoot_length", 
+                    groupnames=c("species_id", "sex"))
+# Convert dose to a factor variable
+df2$sex = as.factor(df2$sex)
+head(df2)
 ```
 
 ```{r Average rodent hindfoot length graph}
-ggplot(surveys_hfoot_id, aes(x = species_id, y = average_hfoot)) +
-    theme_classic() + theme(legend.position = "right") +
-    labs(title = "Average Rodent Hindfoot Length by Species ID", x = "Species ID", 
-         y = "Hindfoot Length (cm)") + 
-    stat_summary(fun.y = "mean", geom = "bar") +
-    geom_text(aes(label=round(average_hfoot)), vjust=-0.3, size=3.5) +
+ggplot(df2, aes(x = species_id, y = hindfoot_length, fill = sex)) + 
+    geom_bar(stat="identity", color="black", 
+             position=position_dodge()) +
+    geom_errorbar(aes(ymin=hindfoot_length-sd, ymax=hindfoot_length+sd), width=.2,
+                  position=position_dodge(.9)) +
+    labs(title= "Rodent Hindfoot Length by Species ID and Gender", 
+         x="Species ID", y = "Hindfoot Length (cm)", fill = "Gender") +
+    theme_classic() + #geom_text(aes(label=round(hindfoot_length)), vjust=-0.3, size=3.5) +
     theme(plot.title = element_text(hjust = 0.5, size = 14)) + 
     theme(axis.text.x = element_text(angle = 68, hjust = 1, size = 9)) +
     theme(axis.text.y = element_text(size = 9))
 ```
-Figure 2.3 | The bar plot shows average hindfoot length by rodent species ID. DS has the longest average hindfoot length, i.e. 50cm, whereas BA has the shortest, i.e. 13cm. Most of the species are within the range of 18-22cm. 
+Figure 2.3 | The bar plot shows average hindfoot length by rodent species ID. DS has the longest average hindfoot length, i.e. (`r max(df2$hindfoot_length)`)cm, whereas BA has the shortest, i.e. (`r min(df2$hindfoot_length)`)cm. Most of the species are within the range of 18-22cm. 
 
 This plot suggests hindfoot length (cm) is different according to species ID. We conducted several tests to determine if this was the case. We began by conducting a Bartlett Test of Homogeneity of Variances to evaluate the homogeneity of variance assumption of ANOVA.
 ```{r Bartlett Test}
@@ -243,7 +267,10 @@ ggplot(aes(x = plot_type, y = hindfoot_length), data = surveys_hfoot_plottype) +
          y = "Hindfoot Length (cm)") +
     theme(plot.title = element_text(hjust = 0.5, size = 14)) + 
     theme(axis.text.x = element_text(angle = 68, hjust = 1, size = 9)) +
-    theme(axis.text.y = element_text(size = 9))
+    theme(axis.text.y = element_text(size = 9)) +
+    stat_summary(fun.data=mean_sdl, fun.args = list(mult=1), 
+                 geom="errorbar", color="black", width=0.1) +
+    stat_summary(fun.y=mean, geom="point", color="black")
 ```
 Figure 2.4 | The bar plot shows average hindfoot length by plot type. Control and Spectab exclosure contain similar average rodent hindfoot length information.
 
